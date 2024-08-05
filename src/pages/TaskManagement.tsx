@@ -1,43 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TaskList from '../components/task/TaskList';
 import TaskForm from '../components/task/TaskForm';
 import { Task } from '../types/task';
 
 const TaskManagement: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', title: 'Complete project proposal', status: 'in-progress', dueDate: '2023-08-15' },
-    { id: '2', title: 'Review team performance', status: 'completed', dueDate: '2023-08-10' },
-    { id: '3', title: 'Prepare for client meeting', status: 'in-progress', dueDate: '2023-08-20' },
-  ]);
-
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log('TaskManagement component mounted');
+    // Load tasks from localStorage or API here
+    try {
+      const storedTasks = localStorage.getItem('tasks');
+      if (storedTasks) {
+        setTasks(JSON.parse(storedTasks));
+      }
+    } catch (err) {
+      console.error('Error loading tasks:', err);
+      setError('Failed to load tasks. Please try refreshing the page.');
+    }
+  }, []);
 
   const handleTaskClick = (task: Task) => {
+    console.log('Task clicked:', task);
     setEditingTask(task);
     setIsFormOpen(true);
   };
 
   const handleFormSubmit = (taskData: Omit<Task, 'id'>) => {
-    if (editingTask) {
-      // Update existing task
-      setTasks(tasks.map(task => task.id === editingTask.id ? { ...task, ...taskData } : task));
-    } else {
-      // Create new task
-      const newTask: Task = {
-        ...taskData,
-        id: String(Date.now()), // Simple ID generation
-      };
-      setTasks([...tasks, newTask]);
+    try {
+      if (editingTask) {
+        // Update existing task
+        setTasks(tasks.map(task => task.id === editingTask.id ? { ...task, ...taskData } : task));
+      } else {
+        // Create new task
+        const newTask: Task = {
+          ...taskData,
+          id: String(Date.now()), // Simple ID generation
+        };
+        setTasks([...tasks, newTask]);
+      }
+      setIsFormOpen(false);
+      setEditingTask(undefined);
+      // Save tasks to localStorage
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    } catch (err) {
+      console.error('Error submitting task:', err);
+      setError('Failed to save task. Please try again.');
     }
-    setIsFormOpen(false);
-    setEditingTask(undefined);
   };
 
   const handleFormCancel = () => {
     setIsFormOpen(false);
     setEditingTask(undefined);
   };
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
 
   return (
     <div>
@@ -61,7 +83,11 @@ const TaskManagement: React.FC = () => {
         </div>
       )}
 
-      <TaskList tasks={tasks} onTaskClick={handleTaskClick} />
+      {tasks.length > 0 ? (
+        <TaskList tasks={tasks} onTaskClick={handleTaskClick} />
+      ) : (
+        <p>No tasks available. Click 'Add New Task' to create one.</p>
+      )}
     </div>
   );
 };

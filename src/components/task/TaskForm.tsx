@@ -1,24 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { Task } from '../../types/task';
+import { Task, TaskStatus, TaskPriority } from '../../types/task';
+import { 
+  TextField, 
+  Select, 
+  MenuItem, 
+  Button, 
+  Chip,
+  Box,
+  FormControl,
+  InputLabel
+} from '@mui/material';
 
 interface TaskFormProps {
   task?: Task;
-  onSubmit: (task: Omit<Task, 'id'>) => void;
+  onSubmit: (task: Omit<Task, 'id'>) => void;  // 移除 'subTasks'
   onCancel: () => void;
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({ task, onSubmit, onCancel }) => {
   const [title, setTitle] = useState(task?.title || '');
   const [description, setDescription] = useState(task?.description || '');
+  const [status, setStatus] = useState<TaskStatus>(task?.status || 'not-started');
+  const [priority, setPriority] = useState<TaskPriority>(task?.priority || 'medium');
   const [dueDate, setDueDate] = useState(task?.dueDate || '');
-  const [status, setStatus] = useState(task?.status || 'not-started');
+  const [category, setCategory] = useState(task?.category || '');
+  const [tags, setTags] = useState<string[]>(task?.tags || []);
+  const [newTag, setNewTag] = useState('');
 
   useEffect(() => {
     if (task) {
       setTitle(task.title);
       setDescription(task.description || '');
-      setDueDate(task.dueDate);
       setStatus(task.status);
+      setPriority(task.priority);
+      setDueDate(task.dueDate);
+      setCategory(task.category);
+      setTags(task.tags);
     }
   }, [task]);
 
@@ -27,85 +44,108 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onSubmit, onCancel }) => {
     onSubmit({
       title,
       description,
+      status,
+      priority,
       dueDate,
-      status: status as Task['status'],
+      category,
+      tags,
+      parentId: task?.parentId,
     });
   };
 
+  const handleAddTag = () => {
+    if (newTag && !tags.includes(newTag)) {
+      setTags([...tags, newTag]);
+      setNewTag('');
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-          Title
-        </label>
-        <input
-          type="text"
-          id="title"
+    <form onSubmit={handleSubmit}>
+      <Box sx={{ '& .MuiTextField-root': { m: 1, width: '25ch' }, display: 'flex', flexDirection: 'column' }}>
+        <TextField
+          label="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
         />
-      </div>
-
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-          Description
-        </label>
-        <textarea
-          id="description"
+        <TextField
+          label="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          multiline
           rows={3}
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        ></textarea>
-      </div>
-
-      <div>
-        <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">
-          Due Date
-        </label>
-        <input
+        />
+        <FormControl>
+          <InputLabel>Status</InputLabel>
+          <Select
+            value={status}
+            label="Status"
+            onChange={(e) => setStatus(e.target.value as TaskStatus)}
+          >
+            <MenuItem value="not-started">Not Started</MenuItem>
+            <MenuItem value="in-progress">In Progress</MenuItem>
+            <MenuItem value="completed">Completed</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl>
+          <InputLabel>Priority</InputLabel>
+          <Select
+            value={priority}
+            label="Priority"
+            onChange={(e) => setPriority(e.target.value as TaskPriority)}
+          >
+            <MenuItem value="low">Low</MenuItem>
+            <MenuItem value="medium">Medium</MenuItem>
+            <MenuItem value="high">High</MenuItem>
+          </Select>
+        </FormControl>
+        <TextField
+          label="Due Date"
           type="date"
-          id="dueDate"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
-          required
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          InputLabelProps={{
+            shrink: true,
+          }}
         />
-      </div>
-
-      <div>
-        <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-          Status
-        </label>
-        <select
-          id="status"
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-        >
-          <option value="not-started">Not Started</option>
-          <option value="in-progress">In Progress</option>
-          <option value="completed">Completed</option>
-        </select>
-      </div>
-
-      <div className="flex justify-end space-x-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          {task ? 'Update Task' : 'Create Task'}
-        </button>
-      </div>
+        <TextField
+          label="Category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        />
+        <Box>
+          <TextField
+            label="Add Tag"
+            value={newTag}
+            onChange={(e) => setNewTag(e.target.value)}
+          />
+          <Button onClick={handleAddTag} variant="contained" color="primary">
+            Add
+          </Button>
+        </Box>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+          {tags.map((tag, index) => (
+            <Chip
+              key={index}
+              label={tag}
+              onDelete={() => handleRemoveTag(tag)}
+            />
+          ))}
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+          <Button onClick={onCancel} sx={{ mr: 1 }}>
+            Cancel
+          </Button>
+          <Button type="submit" variant="contained" color="primary">
+            {task ? 'Update Task' : 'Create Task'}
+          </Button>
+        </Box>
+      </Box>
     </form>
   );
 };

@@ -1,83 +1,52 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import PomodoroTimer from '../components/PomodoroTimer';
+import React from 'react';
+import { Grid, Paper, Typography, Box } from '@mui/material';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+const data = [
+  { name: 'Mon', tasks: 4 },
+  { name: 'Tue', tasks: 3 },
+  { name: 'Wed', tasks: 2 },
+  { name: 'Thu', tasks: 5 },
+  { name: 'Fri', tasks: 1 },
+  { name: 'Sat', tasks: 6 },
+  { name: 'Sun', tasks: 3 },
+];
 
 const Dashboard: React.FC = () => {
-  // Mock data for demonstration
-  const upcomingTasks = [
-    { id: '1', title: 'Complete project proposal', dueDate: '2023-08-15' },
-    { id: '2', title: 'Review team performance', dueDate: '2023-08-10' },
-    { id: '3', title: 'Prepare for client meeting', dueDate: '2023-08-20' },
-  ];
-
-  const timeBlockSummary = {
-    totalHours: 8,
-    productive: 5.5,
-    unproductive: 2.5,
-  };
-
-  const [pomodoroCount, setPomodoroCount] = useState(0);
-
-  const handlePomodoroComplete = () => {
-    setPomodoroCount((prevCount) => prevCount + 1);
-    // Here you could also update a task's progress or log the completed pomodoro
-  };
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div className="bg-white overflow-hidden shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">Upcoming Tasks</h3>
-          <div className="mt-5">
-            <ul className="divide-y divide-gray-200">
-              {upcomingTasks.map((task) => (
-                <li key={task.id} className="py-4">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium text-gray-900">{task.title}</div>
-                    <div className="text-sm text-gray-500">{task.dueDate}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="mt-6">
-            <Link to="/tasks" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
-              View all tasks
-              <span aria-hidden="true"> &rarr;</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white overflow-hidden shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">Time Block Summary</h3>
-          <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-            <div className="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
-              <dt className="text-sm font-medium text-gray-500 truncate">Total Hours</dt>
-              <dd className="mt-1 text-3xl font-semibold text-gray-900">{timeBlockSummary.totalHours}</dd>
-            </div>
-            <div className="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
-              <dt className="text-sm font-medium text-gray-500 truncate">Productive Hours</dt>
-              <dd className="mt-1 text-3xl font-semibold text-green-600">{timeBlockSummary.productive}</dd>
-            </div>
-            <div className="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
-              <dt className="text-sm font-medium text-gray-500 truncate">Unproductive Hours</dt>
-              <dd className="mt-1 text-3xl font-semibold text-red-600">{timeBlockSummary.unproductive}</dd>
-            </div>
-          </dl>
-        </div>
-      </div>
-
-      <div className="bg-white overflow-hidden shadow rounded-lg col-span-full">
-        <div className="px-4 py-5 sm:p-6">
-          <PomodoroTimer initialTime={1500} onTimerComplete={handlePomodoroComplete} />
-          <p className="mt-4 text-center text-lg font-medium text-gray-900">
-            Completed Pomodoros: {pomodoroCount}
-          </p>
-        </div>
-      </div>
-    </div>
+    <Box sx={{ flexGrow: 1 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Dashboard
+      </Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Tasks Overview
+            </Typography>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="tasks" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Recent Activities
+            </Typography>
+            {/* Add a list of recent activities here */}
+          </Paper>
+        </Grid>
+        {/* Add more dashboard widgets here */}
+      </Grid>
+    </Box>
   );
 };
 
