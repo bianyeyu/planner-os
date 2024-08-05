@@ -8,6 +8,7 @@ import CalendarView from './pages/CalendarView';
 import TimeTracking from './pages/TimeTracking';
 import HabitManagement from './pages/HabitManagement';
 import TimeBlockManagement from './pages/TimeBlockManagement';
+import { TaskProvider } from './context/TaskContext';
 
 const theme = createTheme({
   palette: {
@@ -21,24 +22,38 @@ const theme = createTheme({
       default: '#FFFBFE',
     },
   },
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+      },
+    },
+  },
 });
 
 const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/tasks" element={<TaskManagement />} />
-            <Route path="/calendar" element={<CalendarView />} />
-            <Route path="/time-tracking" element={<TimeTracking />} />
-            <Route path="/habits" element={<HabitManagement />} />
-            <Route path="/time-blocks" element={<TimeBlockManagement />} />
-          </Routes>
-        </Layout>
-      </Router>
+      <TaskProvider>
+        <Router>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/tasks" element={<TaskManagement />} />
+              <Route path="/calendar" element={<CalendarView />} />
+              <Route path="/time-tracking" element={<TimeTracking />} />
+              <Route path="/habits" element={<HabitManagement />} />
+              <Route path="/time-blocks" element={<TimeBlockManagement />} />
+            </Routes>
+          </Layout>
+        </Router>
+      </TaskProvider>
     </ThemeProvider>
   );
 };

@@ -1,19 +1,91 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Task } from '../../types/task';
-import { 
-  List, 
-  ListItem, 
-  ListItemText, 
-  ListItemIcon, 
-  Chip,
-  Typography
-} from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import PendingIcon from '@mui/icons-material/Pending';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
-import DragHandleIcon from '@mui/icons-material/DragHandle';
-import LowPriorityIcon from '@mui/icons-material/LowPriority';
+import { List, ListItem, ListItemText, ListItemIcon, Chip, Collapse, IconButton, Button } from '@mui/material';
+import { ExpandLess, ExpandMore, CheckCircle, RadioButtonUnchecked, Pending } from '@mui/icons-material';
+import { TaskContext } from '../../pages/TaskManagement';
+
+interface TaskItemProps {
+  task: Task;
+  onTaskClick: (task: Task) => void;
+  level: number;
+}
+
+const TaskItem: React.FC<TaskItemProps> = ({ task, onTaskClick, level }) => {
+  const [open, setOpen] = React.useState(false);
+  const taskContext = useContext(TaskContext);
+
+  if (!taskContext) {
+    throw new Error("TaskContext not found");
+  }
+
+  const { tasks, setTasks } = taskContext;
+
+  const handleClick = () => {
+    setOpen(!open);
+    onTaskClick(task);
+  };
+
+  const getStatusIcon = (status: Task['status']) => {
+    switch (status) {
+      case 'completed': return <CheckCircle />;
+      case 'in-progress': return <Pending />;
+      default: return <RadioButtonUnchecked />;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const updateTaskStatusRecursively = (taskToUpdate: Task, newStatus: Task['status']): Task => {
+    return {
+      ...taskToUpdate,
+      status: newStatus,
+      subTasks: taskToUpdate.subTasks.map(subTask => updateTaskStatusRecursively(subTask, newStatus))
+    };
+  };
+
+  const toggleTaskStatus = () => {
+    const newStatus = task.status === 'completed' ? 'not-started' : 'completed';
+    const updatedTasks = tasks.map(t => 
+      t.id === task.id ? updateTaskStatusRecursively(t, newStatus) : t
+    );
+    setTasks(updatedTasks);
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+  };
+
+  return (
+    <>
+      <ListItem button onClick={handleClick} style={{ paddingLeft: `${level * 16}px` }}>
+        <ListItemIcon>{getStatusIcon(task.status)}</ListItemIcon>
+        <ListItemText 
+          primary={task.title}
+          secondary={`${formatDate(task.startDate)} - ${formatDate(task.endDate)} | Est. ${task.estimatedTime} min | Priority: ${task.priority}`}
+        />
+        {task.tags.map((tag, index) => (
+          <Chip key={index} label={tag} size="small" style={{ marginRight: 4 }} />
+        ))}
+        <Button onClick={(e) => { e.stopPropagation(); toggleTaskStatus(); }}>
+          {task.status === 'completed' ? 'Reopen' : 'Complete'}
+        </Button>
+        {task.subTasks.length > 0 && (
+          <IconButton onClick={(e) => { e.stopPropagation(); setOpen(!open); }}>
+            {open ? <ExpandLess /> : <ExpandMore />}
+          </IconButton>
+        )}
+      </ListItem>
+      {task.subTasks.length > 0 && (
+        <Collapse in={open} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {task.subTasks.map((subTask) => (
+              <TaskItem key={subTask.id} task={subTask} onTaskClick={onTaskClick} level={level + 1} />
+            ))}
+          </List>
+        </Collapse>
+      )}
+    </>
+  );
+};
 
 interface TaskListProps {
   tasks: Task[];
@@ -21,50 +93,10 @@ interface TaskListProps {
 }
 
 const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskClick }) => {
-  const getStatusIcon = (status: Task['status']) => {
-    switch (status) {
-      case 'completed': return <CheckCircleIcon />;
-      case 'in-progress': return <PendingIcon />;
-      default: return <RadioButtonUncheckedIcon />;
-    }
-  };
-
-  const getPriorityIcon = (priority: Task['priority']) => {
-    switch (priority) {
-      case 'high': return <PriorityHighIcon />;
-      case 'medium': return <DragHandleIcon />;
-      case 'low': return <LowPriorityIcon />;
-    }
-  };
-
   return (
     <List>
       {tasks.map((task) => (
-        <ListItem key={task.id} onClick={() => onTaskClick(task)} button>
-          <ListItemIcon>
-            {getStatusIcon(task.status)}
-          </ListItemIcon>
-          <ListItemText
-            primary={task.title}
-            secondary={
-              <>
-                <Typography component="span" variant="body2" color="text.primary">
-                  {task.description}
-                </Typography>
-                <br />
-                Due: {new Date(task.dueDate).toLocaleDateString()}
-                <br />
-                Category: {task.category}
-              </>
-            }
-          />
-          <ListItemIcon>
-            {getPriorityIcon(task.priority)}
-          </ListItemIcon>
-          {task.tags.map((tag, index) => (
-            <Chip key={index} label={tag} size="small" />
-          ))}
-        </ListItem>
+        <TaskItem key={task.id} task={task} onTaskClick={onTaskClick} level={0} />
       ))}
     </List>
   );

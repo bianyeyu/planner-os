@@ -1,13 +1,15 @@
+// src/types/task.ts
+
 export interface Task {
     id: string;
     title: string;
     description?: string;
     status: 'not-started' | 'in-progress' | 'completed';
     priority: 'low' | 'medium' | 'high';
+    startDate: string;
     dueDate: string;
-    category: string;
+    estimatedTime?: number;
     tags: string[];
-    parentId?: string;
     subTasks: Task[];
   }
   
