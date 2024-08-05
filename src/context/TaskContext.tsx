@@ -2,51 +2,49 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Task } from '../types/task';
 
 interface TaskContextType {
-  tasks: Task[] | null;
-  setTasks: React.Dispatch<React.SetStateAction<Task[] | null>>;
+  tasks: Task[];
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+  addTask: (task: Task) => void;
   updateTask: (updatedTask: Task) => void;
-  loading: boolean;
+  deleteTask: (taskId: string) => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [tasks, setTasks] = useState<Task[] | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
-    const loadTasks = async () => {
-      setLoading(true);
-      try {
-        const storedTasks = localStorage.getItem('tasks');
-        if (storedTasks) {
-          setTasks(JSON.parse(storedTasks));
-        } else {
-          setTasks([]);
-        }
-      } catch (error) {
-        console.error('Error loading tasks:', error);
-        setTasks([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadTasks();
+    const storedTasks = localStorage.getItem('tasks');
+    if (storedTasks) {
+      setTasks(JSON.parse(storedTasks));
+    }
   }, []);
 
+  const saveTasks = (newTasks: Task[]) => {
+    setTasks(newTasks);
+    localStorage.setItem('tasks', JSON.stringify(newTasks));
+  };
+
+  const addTask = (task: Task) => {
+    const newTasks = [...tasks, task];
+    saveTasks(newTasks);
+  };
+
   const updateTask = (updatedTask: Task) => {
-    if (tasks) {
-      const newTasks = tasks.map(task => 
-        task.id === updatedTask.id ? updatedTask : task
-      );
-      setTasks(newTasks);
-      localStorage.setItem('tasks', JSON.stringify(newTasks));
-    }
+    const newTasks = tasks.map(task => 
+      task.id === updatedTask.id ? updatedTask : task
+    );
+    saveTasks(newTasks);
+  };
+
+  const deleteTask = (taskId: string) => {
+    const newTasks = tasks.filter(task => task.id !== taskId);
+    saveTasks(newTasks);
   };
 
   return (
-    <TaskContext.Provider value={{ tasks, setTasks, updateTask, loading }}>
+    <TaskContext.Provider value={{ tasks, setTasks, addTask, updateTask, deleteTask }}>
       {children}
     </TaskContext.Provider>
   );

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Task, TaskStatus, TaskPriority } from '../../types/task';
+import React, { useState } from 'react';
 import { 
   TextField, 
   Select, 
@@ -11,12 +10,28 @@ import {
   CardContent, 
   CardActions, 
   Grid, 
-  Typography, 
-  IconButton,
-  InputAdornment
+  IconButton, 
+  Typography 
 } from '@mui/material';
-import { Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useTaskContext } from '../../context/TaskContext';
+import DateRangePicker from './DateRangePicker';
+import dayjs, { Dayjs } from 'dayjs';
+
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  status: 'not-started' | 'in-progress' | 'completed';
+  priority: 'low' | 'medium' | 'high';
+  startDate: string;
+  dueDate: string;
+  tags: string[];
+  subTasks: { id: string; title: string; completed: boolean }[];
+}
+
+type TaskStatus = Task['status'];
+type TaskPriority = Task['priority'];
 
 interface TaskFormProps {
   task?: Task;
@@ -24,39 +39,35 @@ interface TaskFormProps {
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({ task, onCancel }) => {
-  const { updateTask, tasks, setTasks } = useTaskContext();
+  const { addTask, updateTask } = useTaskContext();
   const [title, setTitle] = useState(task?.title || '');
   const [description, setDescription] = useState(task?.description || '');
   const [status, setStatus] = useState<TaskStatus>(task?.status || 'not-started');
   const [priority, setPriority] = useState<TaskPriority>(task?.priority || 'medium');
-  const [startDate, setStartDate] = useState(task?.startDate || '');
-  const [dueDate, setDueDate] = useState(task?.dueDate || '');
-  const [startTime, setStartTime] = useState(task?.startTime || '');
-  const [estimatedTime, setEstimatedTime] = useState(task?.estimatedTime || 0);
-  const [category, setCategory] = useState(task?.category || '');
+  const [startDate, setStartDate] = useState<Dayjs | null>(task?.startDate ? dayjs(task.startDate) : null);
+  const [endDate, setEndDate] = useState<Dayjs | null>(task?.dueDate ? dayjs(task.dueDate) : null);
   const [tags, setTags] = useState<string[]>(task?.tags || []);
   const [newTag, setNewTag] = useState('');
+  const [subTasks, setSubTasks] = useState<string[]>(task?.subTasks.map(st => st.title) || []);
+  const [newSubTask, setNewSubTask] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const updatedTask: Task = {
+    const taskData: Task = {
       id: task?.id || Date.now().toString(),
       title,
       description,
       status,
       priority,
-      startDate,
-      dueDate,
-      startTime,
-      estimatedTime,
-      category,
+      startDate: startDate ? startDate.format('YYYY-MM-DD') : '',
+      dueDate: endDate ? endDate.format('YYYY-MM-DD') : '',
       tags,
-      subTasks: task?.subTasks || [],
+      subTasks: subTasks.map(st => ({ id: Date.now().toString(), title: st, completed: false })),
     };
     if (task) {
-      updateTask(updatedTask);
+      updateTask(taskData);
     } else {
-      setTasks([...(tasks || []), updatedTask]);
+      addTask(taskData);
     }
     onCancel();
   };
@@ -68,8 +79,20 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onCancel }) => {
     }
   };
 
+  const handleAddSubTask = () => {
+    if (newSubTask && !subTasks.includes(newSubTask)) {
+      setSubTasks([...subTasks, newSubTask]);
+      setNewSubTask('');
+    }
+  };
+
+  const handleDateChange = (newValue: [Dayjs | null, Dayjs | null]) => {
+    setStartDate(newValue[0]);
+    setEndDate(newValue[1]);
+  };
+
   return (
-    <Card>
+    <Card sx={{ maxWidth: 400, margin: 'auto' }}>
       <form onSubmit={handleSubmit}>
         <CardContent>
           <Grid container spacing={2}>
@@ -80,7 +103,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onCancel }) => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                variant="outlined"
+                size="small"
               />
             </Grid>
             <Grid item xs={12}>
@@ -91,53 +114,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onCancel }) => {
                 onChange={(e) => setDescription(e.target.value)}
                 multiline
                 rows={2}
-                variant="outlined"
+                size="small"
               />
             </Grid>
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="截止日期"
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="开始日期"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="开始时间"
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="预计耗时"
-                type="number"
-                value={estimatedTime}
-                onChange={(e) => setEstimatedTime(parseInt(e.target.value))}
-                InputProps={{
-                  endAdornment: <InputAdornment position="end">分钟</InputAdornment>,
-                }}
-                variant="outlined"
+            <Grid item xs={12}>
+              <DateRangePicker
+                startDate={startDate}
+                endDate={endDate}
+                onChange={handleDateChange}
               />
             </Grid>
             <Grid item xs={6}>
@@ -145,8 +129,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onCancel }) => {
                 fullWidth
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as TaskPriority)}
-                label="优先级"
-                variant="outlined"
+                size="small"
               >
                 <MenuItem value="low">低</MenuItem>
                 <MenuItem value="medium">中</MenuItem>
@@ -154,23 +137,25 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onCancel }) => {
               </Select>
             </Grid>
             <Grid item xs={6}>
-              <TextField
+              <Select
                 fullWidth
-                label="分类"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                variant="outlined"
-              />
+                value={status}
+                onChange={(e) => setStatus(e.target.value as TaskStatus)}
+                size="small"
+              >
+                <MenuItem value="not-started">未开始</MenuItem>
+                <MenuItem value="in-progress">进行中</MenuItem>
+                <MenuItem value="completed">已完成</MenuItem>
+              </Select>
             </Grid>
             <Grid item xs={12}>
               <Box display="flex" alignItems="center">
                 <TextField
-                  label="标签"
+                  label="添加标签"
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
-                  variant="outlined"
                   size="small"
-                  style={{ marginRight: 8 }}
+                  fullWidth
                 />
                 <IconButton onClick={handleAddTag} size="small">
                   <AddIcon />
@@ -182,16 +167,41 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onCancel }) => {
                     key={index}
                     label={tag}
                     onDelete={() => setTags(tags.filter(t => t !== tag))}
+                    size="small"
                     style={{ marginRight: 4, marginBottom: 4 }}
                   />
+                ))}
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="subtitle2">子任务</Typography>
+              <Box display="flex" alignItems="center">
+                <TextField
+                  value={newSubTask}
+                  onChange={(e) => setNewSubTask(e.target.value)}
+                  size="small"
+                  fullWidth
+                />
+                <IconButton onClick={handleAddSubTask} size="small">
+                  <AddIcon />
+                </IconButton>
+              </Box>
+              <Box mt={1}>
+                {subTasks.map((subTask, index) => (
+                  <Box key={index} display="flex" alignItems="center" mb={1}>
+                    <Typography variant="body2" style={{ marginRight: 8 }}>{subTask}</Typography>
+                    <IconButton size="small" onClick={() => setSubTasks(subTasks.filter((_, i) => i !== index))}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
                 ))}
               </Box>
             </Grid>
           </Grid>
         </CardContent>
         <CardActions style={{ justifyContent: 'flex-end' }}>
-          <Button onClick={onCancel}>取消</Button>
-          <Button type="submit" variant="contained" color="primary">
+          <Button onClick={onCancel} size="small">取消</Button>
+          <Button type="submit" variant="contained" color="primary" size="small">
             {task ? '更新任务' : '创建任务'}
           </Button>
         </CardActions>
