@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import PomodoroTimer from '../components/PomodoroTimer';
 
 const Dashboard: React.FC = () => {
   // Mock data for demonstration
@@ -13,6 +14,13 @@ const Dashboard: React.FC = () => {
     totalHours: 8,
     productive: 5.5,
     unproductive: 2.5,
+  };
+
+  const [pomodoroCount, setPomodoroCount] = useState(0);
+
+  const handlePomodoroComplete = () => {
+    setPomodoroCount((prevCount) => prevCount + 1);
+    // Here you could also update a task's progress or log the completed pomodoro
   };
 
   return (
@@ -58,6 +66,15 @@ const Dashboard: React.FC = () => {
               <dd className="mt-1 text-3xl font-semibold text-red-600">{timeBlockSummary.unproductive}</dd>
             </div>
           </dl>
+        </div>
+      </div>
+
+      <div className="bg-white overflow-hidden shadow rounded-lg col-span-full">
+        <div className="px-4 py-5 sm:p-6">
+          <PomodoroTimer initialTime={1500} onTimerComplete={handlePomodoroComplete} />
+          <p className="mt-4 text-center text-lg font-medium text-gray-900">
+            Completed Pomodoros: {pomodoroCount}
+          </p>
         </div>
       </div>
     </div>
