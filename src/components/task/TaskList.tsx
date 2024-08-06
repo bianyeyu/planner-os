@@ -1,78 +1,104 @@
 import React, { useState } from 'react';
+import { 
+  List, 
+  ListItem, 
+  ListItemText, 
+  Chip, 
+  IconButton,
+  Typography,
+  Collapse,
+} from '@mui/material';
+import { 
+  Edit as EditIcon,
+  ExpandLess,
+  ExpandMore,
+} from '@mui/icons-material';
 import { Task } from '../../types/task';
-import { List, ListItem, ListItemText, ListItemIcon, Chip, Collapse, IconButton, Typography, Box } from '@mui/material';
-import { ExpandLess, ExpandMore, CheckCircle, RadioButtonUnchecked, Pending } from '@mui/icons-material';
-import { useTaskContext } from '../../context/TaskContext';
 
 interface TaskItemProps {
   task: Task;
   onTaskClick: (task: Task) => void;
+  level: number;
 }
 
-const TaskItem: React.FC<TaskItemProps> = ({ task, onTaskClick }) => {
-  const { updateTask } = useTaskContext();
+const TaskItem: React.FC<TaskItemProps> = ({ task, onTaskClick, level }) => {
+  const [open, setOpen] = useState(false);
 
-  const getStatusIcon = (status: Task['status']) => {
-    switch (status) {
-      case 'completed': return <CheckCircle />;
-      case 'in-progress': return <Pending />;
-      default: return <RadioButtonUnchecked />;
+  const getPriorityColor = (priority: Task['priority']) => {
+    switch (priority) {
+      case 'high': return 'error';
+      case 'medium': return 'warning';
+      case 'low': return 'success';
     }
   };
 
-  const toggleTaskStatus = () => {
-    const newStatus = task.status === 'completed' ? 'not-started' : 'completed';
-    updateTask({ ...task, status: newStatus });
-  };
-
   return (
-    <ListItem>
-      <ListItemIcon onClick={toggleTaskStatus}>
-        {getStatusIcon(task.status)}
-      </ListItemIcon>
-      <ListItemText 
-        primary={task.title}
-        secondary={`${task.startDate} - ${task.dueDate}`}
-        onClick={() => onTaskClick(task)}
-      />
-      {task.tags.map((tag, index) => (
-        <Chip key={index} label={tag} size="small" style={{ marginRight: 4 }} />
-      ))}
-    </ListItem>
+    <>
+      <ListItem
+        style={{ paddingLeft: `${level * 20}px` }}
+        secondaryAction={
+          <>
+            {task.subTasks.length > 0 && (
+              <IconButton edge="end" aria-label="expand" onClick={() => setOpen(!open)}>
+                {open ? <ExpandLess /> : <ExpandMore />}
+              </IconButton>
+            )}
+            <IconButton edge="end" aria-label="edit" onClick={() => onTaskClick(task)}>
+              <EditIcon />
+            </IconButton>
+          </>
+        }
+      >
+        <ListItemText
+          primary={
+            <Typography variant="subtitle1" component="div">
+              {task.title}
+              <Chip
+                size="small"
+                label={task.priority}
+                color={getPriorityColor(task.priority)}
+                style={{ marginLeft: '10px' }}
+              />
+            </Typography>
+          }
+          secondary={
+            <>
+              <Typography variant="body2" component="span">
+                {task.startDate} - {task.dueDate}
+              </Typography>
+              <div>
+                {task.tags.map((tag, index) => (
+                  <Chip key={index} label={tag} size="small" style={{ marginRight: 4, marginTop: 4 }} />
+                ))}
+              </div>
+            </>
+          }
+        />
+      </ListItem>
+      {task.subTasks.length > 0 && (
+        <Collapse in={open} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {task.subTasks.map((subTask, index) => (
+              <TaskItem key={index} task={subTask} onTaskClick={onTaskClick} level={level + 1} />
+            ))}
+          </List>
+        </Collapse>
+      )}
+    </>
   );
 };
 
 interface TaskListProps {
+  tasks: Task[];
   onTaskClick: (task: Task) => void;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ onTaskClick }) => {
-  const { tasks } = useTaskContext();
-  const [completedExpanded, setCompletedExpanded] = useState(false);
-
-  const activeTasks = tasks.filter(task => task.status !== 'completed');
-  const completedTasks = tasks.filter(task => task.status === 'completed');
-
+const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskClick }) => {
   return (
     <List>
-      {activeTasks.map((task) => (
-        <TaskItem key={task.id} task={task} onTaskClick={onTaskClick} />
+      {tasks.map((task) => (
+        <TaskItem key={task.id} task={task} onTaskClick={onTaskClick} level={0} />
       ))}
-      <ListItem button onClick={() => setCompletedExpanded(!completedExpanded)}>
-        <ListItemText primary={<Typography variant="h6">已完成</Typography>} />
-        <IconButton edge="end" aria-label="expand">
-          {completedExpanded ? <ExpandLess /> : <ExpandMore />}
-        </IconButton>
-      </ListItem>
-      <Collapse in={completedExpanded} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
-          {completedTasks.map((task) => (
-            <Box key={task.id} ml={2}>
-              <TaskItem task={task} onTaskClick={onTaskClick} />
-            </Box>
-          ))}
-        </List>
-      </Collapse>
     </List>
   );
 };

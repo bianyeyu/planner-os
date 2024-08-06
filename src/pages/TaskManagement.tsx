@@ -1,72 +1,57 @@
-import React, { useState, useEffect, createContext } from 'react';
-import { Button, Box } from '@mui/material';
+import React, { useState } from 'react';
+import { Button, Box, Dialog, DialogTitle, DialogContent } from '@mui/material';
 import TaskForm from '../components/task/TaskForm';
 import TaskList from '../components/task/TaskList';
 import { Task } from '../types/task';
-
-export const TaskContext = createContext<{
-  tasks: Task[];
-  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-} | undefined>(undefined);
+import { useTaskContext } from '../context/TaskContext';
 
 const TaskManagement: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const { tasks, addTask, updateTask } = useTaskContext();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-
-  useEffect(() => {
-    const storedTasks = localStorage.getItem('tasks');
-    if (storedTasks) {
-      setTasks(JSON.parse(storedTasks));
-    }
-  }, []);
-
-  const saveTasks = (newTasks: Task[]) => {
-    setTasks(newTasks);
-    localStorage.setItem('tasks', JSON.stringify(newTasks));
-  };
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleTaskSubmit = (taskData: Omit<Task, 'id'>) => {
     if (editingTask) {
-      // Update existing task
-      const updatedTasks = tasks.map(task =>
-        task.id === editingTask.id ? { ...task, ...taskData, id: task.id } : task
-      );
-      saveTasks(updatedTasks);
+      updateTask({ ...taskData, id: editingTask.id });
     } else {
-      // Create new task
-      const newTask: Task = { ...taskData, id: Date.now().toString(), subTasks: [] };
-      saveTasks([...tasks, newTask]);
+      addTask(taskData);
     }
-    setEditingTask(null);
-    setIsFormOpen(false);
+    handleCloseDialog();
   };
 
   const handleTaskClick = (task: Task) => {
     setEditingTask(task);
-    setIsFormOpen(true);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setEditingTask(null);
+    setIsDialogOpen(false);
+  };
+
+  const handleAddNewTask = () => {
+    setEditingTask(null);
+    setIsDialogOpen(true);
   };
 
   return (
-    <TaskContext.Provider value={{ tasks, setTasks }}>
-      <Box sx={{ p: 3 }}>
-        <h1>Task Management</h1>
-        <Button onClick={() => setIsFormOpen(true)} variant="contained" color="primary" sx={{ mb: 2 }}>
-          Add New Task
-        </Button>
-        {isFormOpen && (
+    <Box sx={{ p: 3 }}>
+      <h1>Task Management</h1>
+      <Button onClick={handleAddNewTask} variant="contained" color="primary" sx={{ mb: 2 }}>
+        Add New Task
+      </Button>
+      <TaskList tasks={tasks} onTaskClick={handleTaskClick} />
+      <Dialog open={isDialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+        <DialogTitle>{editingTask ? 'Edit Task' : 'Add New Task'}</DialogTitle>
+        <DialogContent>
           <TaskForm
             task={editingTask || undefined}
             onSubmit={handleTaskSubmit}
-            onCancel={() => {
-              setEditingTask(null);
-              setIsFormOpen(false);
-            }}
+            onCancel={handleCloseDialog}
           />
-        )}
-        <TaskList tasks={tasks} onTaskClick={handleTaskClick} />
-      </Box>
-    </TaskContext.Provider>
+        </DialogContent>
+      </Dialog>
+    </Box>
   );
 };
 

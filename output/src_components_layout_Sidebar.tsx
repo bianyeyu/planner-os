@@ -7,11 +7,9 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import TimerIcon from '@mui/icons-material/Timer';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
-import TodayIcon from '@mui/icons-material/Today';
 
 const navItems = [
-  { name: 'Daily', path: '/daily', icon: <TodayIcon /> },
-  { name: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
+  { name: 'Dashboard', path: '/', icon: <DashboardIcon /> },
   { name: 'Tasks', path: '/tasks', icon: <AssignmentIcon /> },
   { name: 'Calendar', path: '/calendar', icon: <CalendarTodayIcon /> },
   { name: 'Time Tracking', path: '/time-tracking', icon: <TimerIcon /> },

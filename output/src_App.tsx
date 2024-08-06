@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
@@ -8,7 +8,6 @@ import CalendarView from './pages/CalendarView';
 import TimeTracking from './pages/TimeTracking';
 import HabitManagement from './pages/HabitManagement';
 import TimeBlockManagement from './pages/TimeBlockManagement';
-import Daily from './pages/Daily';
 import { TaskProvider } from './context/TaskContext';
 
 const theme = createTheme({
@@ -45,9 +44,7 @@ const App: React.FC = () => {
         <Router>
           <Layout>
             <Routes>
-              <Route path="/" element={<Navigate to="/daily" replace />} />
-              <Route path="/daily" element={<Daily />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/" element={<Dashboard />} />
               <Route path="/tasks" element={<TaskManagement />} />
               <Route path="/calendar" element={<CalendarView />} />
               <Route path="/time-tracking" element={<TimeTracking />} />
