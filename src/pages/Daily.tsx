@@ -9,10 +9,18 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useDaily, DailyEntry, Node } from '../context/DailyContext';
 import { useTaskContext } from '../context/TaskContext';
 import TaskList from '../components/task/TaskList';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 const Daily: React.FC = () => {
+  console.log('Daily component rendering');
+
   const { entries, setEntries, selectedNodes, setSelectedNodes } = useDaily();
   const { tasks } = useTaskContext();
+
+  console.log('Entries:', entries);
+  console.log('Selected Nodes:', selectedNodes);
+  console.log('Tasks:', tasks);
+
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
   const contentRefs = useRef<{ [key: string]: HTMLTextAreaElement | null }>({});
   const todayRef = useRef<HTMLDivElement>(null);
@@ -21,6 +29,7 @@ const Daily: React.FC = () => {
   const [slashMenuPosition, setSlashMenuPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
+    console.log('Daily useEffect running');
     const today = dayjs().format('YYYY-MM-DD');
     setSelectedDate(dayjs(today));
     const todayEntry = entries.find((entry: DailyEntry) => entry.date === today);
@@ -166,17 +175,9 @@ const Daily: React.FC = () => {
     }
   };
 
-  const handleMouseDown = (date: string, nodeId: string, e: React.MouseEvent) => {
-    if (e.shiftKey && selectedNodes.length > 0) {
-      const entry = entries.find((entry: DailyEntry) => entry.date === date);
-      if (entry) {
-        const startIndex = entry.nodes.findIndex((n: Node) => n.id === selectedNodes[0]);
-        const endIndex = entry.nodes.findIndex((n: Node) => n.id === nodeId);
-        const newSelectedNodes = entry.nodes
-          .slice(Math.min(startIndex, endIndex), Math.max(startIndex, endIndex) + 1)
-          .map((n: Node) => n.id);
-        setSelectedNodes(newSelectedNodes);
-      }
+  const handleNodeClick = (nodeId: string, event: React.MouseEvent) => {
+    if (event.shiftKey) {
+      setSelectedNodes(prev => [...prev, nodeId]);
     } else {
       setSelectedNodes([nodeId]);
     }
@@ -184,93 +185,103 @@ const Daily: React.FC = () => {
 
   const sortedEntries = [...entries].sort((a: DailyEntry, b: DailyEntry) => dayjs(b.date).diff(dayjs(a.date)));
 
+  // 去重逻辑
+  const uniqueEntries = sortedEntries.filter((entry, index, self) =>
+    index === self.findIndex((t) => t.date === entry.date)
+  );
+
+  console.log('Unique entries:', uniqueEntries);
+
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ p: 3, display: 'flex' }}>
-        <Box sx={{ flexGrow: 1 }}>
-          <Box sx={{ position: 'sticky', top: 0, background: 'white', zIndex: 1, pb: 2 }}>
-            <DatePicker
-              value={selectedDate}
-              onChange={handleDateChange}
-            />
-          </Box>
-          {sortedEntries.map((entry: DailyEntry) => (
-            <Box 
-              key={entry.date} 
-              sx={{ mb: 4 }} 
-              ref={entry.date === dayjs().format('YYYY-MM-DD') ? todayRef : null}
-            >
-              <Typography variant="h4" gutterBottom>
-                {dayjs(entry.date).format('MMM D, YYYY')}
-              </Typography>
-              {entry.nodes.map((node: Node, index: number) => (
-                <Box 
-                  key={node.id} 
-                  sx={{ 
-                    display: 'flex', 
-                    alignItems: 'flex-start', 
-                    ml: node.level * 2,
-                    bgcolor: selectedNodes.includes(node.id) ? 'action.selected' : 'transparent',
-                  }}
-                  onMouseDown={(e) => handleMouseDown(entry.date, node.id, e)}
-                >
-                  <FiberManualRecordIcon sx={{ fontSize: 8, mt: 2, mr: 1, color: 'text.secondary' }} />
-                  <TextField
-                    inputRef={el => contentRefs.current[`${entry.date}-${node.id}`] = el}
-                    value={node.content}
-                    onChange={(e) => handleContentChange(entry.date, node.id, e.target.value)}
-                    onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => handleKeyDown(e, entry.date, node.id, index)}
-                    fullWidth
-                    multiline
-                    variant="standard"
-                    InputProps={{
-                      disableUnderline: true,
-                      style: { fontSize: '16px', lineHeight: '1.5' }
-                    }}
-                    placeholder={index === 0 ? "Type / for options" : ""}
-                  />
-                </Box>
-              ))}
+    <ErrorBoundary>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Box sx={{ p: 3, display: 'flex' }}>
+          <Box sx={{ flexGrow: 1 }}>
+            <Box sx={{ position: 'sticky', top: 0, background: 'white', zIndex: 1, pb: 2 }}>
+              <DatePicker
+                value={selectedDate}
+                onChange={handleDateChange}
+              />
             </Box>
-          ))}
-        </Box>
-        <IconButton
-          onClick={() => setIsDrawerOpen(true)}
-          sx={{ position: 'fixed', right: 16, top: 16 }}
-        >
-          <ArrowDropDownIcon />
-        </IconButton>
-        <Drawer
-          anchor="right"
-          open={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-        >
-          <Box sx={{ width: 300, p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              待办事项
-            </Typography>
-            <TaskList tasks={tasks} onTaskClick={() => {}} />
+            {uniqueEntries.map((entry: DailyEntry) => (
+              <Box 
+                key={entry.date} 
+                sx={{ mb: 4 }} 
+                ref={entry.date === dayjs().format('YYYY-MM-DD') ? todayRef : null}
+              >
+                <Typography variant="h4" gutterBottom>
+                  {dayjs(entry.date).format('MMM D, YYYY')}
+                </Typography>
+                {entry.nodes.map((node: Node, index: number) => (
+                  <Box
+                    key={node.id}
+                    onClick={(e) => handleNodeClick(node.id, e)}
+                    sx={{ 
+                      display: 'flex', 
+                      alignItems: 'flex-start', 
+                      ml: node.level * 2,
+                      bgcolor: selectedNodes.includes(node.id) ? 'action.selected' : 'transparent',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <FiberManualRecordIcon sx={{ fontSize: 8, mt: 2, mr: 1, color: 'text.secondary' }} />
+                    <TextField
+                      inputRef={el => contentRefs.current[`${entry.date}-${node.id}`] = el}
+                      value={node.content}
+                      onChange={(e) => handleContentChange(entry.date, node.id, e.target.value)}
+                      onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => handleKeyDown(e, entry.date, node.id, index)}
+                      fullWidth
+                      multiline
+                      variant="standard"
+                      InputProps={{
+                        disableUnderline: true,
+                        style: { fontSize: '16px', lineHeight: '1.5' }
+                      }}
+                      placeholder={index === 0 ? "Type / for options" : ""}
+                    />
+                  </Box>
+                ))}
+              </Box>
+            ))}
           </Box>
-        </Drawer>
-        {slashMenuOpen && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: slashMenuPosition.top,
-              left: slashMenuPosition.left,
-              bgcolor: 'background.paper',
-              boxShadow: 3,
-              p: 1,
-              zIndex: 1300,
-            }}
+          <IconButton
+            onClick={() => setIsDrawerOpen(true)}
+            sx={{ position: 'fixed', right: 16, top: 16 }}
           >
-            <Typography>添加任务</Typography>
-            <Typography>插入日期</Typography>
-            <Typography>插入待办事项</Typography>
-          </Box>
-        )}
-      </Box>
-    </LocalizationProvider>
+            <ArrowDropDownIcon />
+          </IconButton>
+          <Drawer
+            anchor="right"
+            open={isDrawerOpen}
+            onClose={() => setIsDrawerOpen(false)}
+          >
+            <Box sx={{ width: 300, p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                待办事项
+              </Typography>
+              <TaskList tasks={tasks} onTaskClick={() => {}} />
+            </Box>
+          </Drawer>
+          {slashMenuOpen && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: slashMenuPosition.top,
+                left: slashMenuPosition.left,
+                bgcolor: 'background.paper',
+                boxShadow: 3,
+                p: 1,
+                zIndex: 1300,
+              }}
+            >
+              <Typography>添加任务</Typography>
+              <Typography>插入日期</Typography>
+              <Typography>插入待办事项</Typography>
+            </Box>
+          )}
+        </Box>
+      </LocalizationProvider>
+    </ErrorBoundary>
   );
 };
 
