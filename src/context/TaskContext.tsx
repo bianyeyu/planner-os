@@ -1,11 +1,11 @@
-import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Task } from '../types/task';
 
 interface TaskContextType {
   tasks: Task[];
-  addTask: (task: Task, parentTaskId?: string) => void;
-  updateTask: (updatedTask: Task) => void;
-  deleteTask: (taskId: string) => void;
+  addTask: (task: Omit<Task, 'id'>) => void;
+  updateTask: (task: Task) => void;
+  deleteTask: (id: string) => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -20,76 +20,25 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const saveTasks = useCallback((newTasks: Task[]) => {
-    console.log('Saving tasks, count:', newTasks.length);
-    setTasks(newTasks);
-    localStorage.setItem('tasks', JSON.stringify(newTasks));
-  }, []);
-
-  const addTask = useCallback((task: Task, parentTaskId?: string) => {
-    setTasks(prevTasks => {
-      if (parentTaskId) {
-        return prevTasks.map(t => {
-          if (t.id === parentTaskId) {
-            return { ...t, subTasks: [...t.subTasks, task] };
-          }
-          return t;
-        });
-      } else {
-        return [...prevTasks, task];
-      }
-    });
-  }, []);
-
-  const updateTask = useCallback((updatedTask: Task) => {
-    setTasks(prevTasks => {
-      const updateTaskRecursive = (taskList: Task[]): Task[] => {
-        return taskList.map(task => {
-          if (task.id === updatedTask.id) {
-            return updatedTask;
-          }
-          if (task.subTasks.length > 0) {
-            return { ...task, subTasks: updateTaskRecursive(task.subTasks) };
-          }
-          return task;
-        });
-      };
-
-      return updateTaskRecursive(prevTasks);
-    });
-  }, []);
-
-  const deleteTask = useCallback((taskId: string) => {
-    setTasks(prevTasks => {
-      const deleteTaskRecursive = (taskList: Task[]): Task[] => {
-        return taskList.filter(task => {
-          if (task.id === taskId) {
-            return false;
-          }
-          if (task.subTasks.length > 0) {
-            task.subTasks = deleteTaskRecursive(task.subTasks);
-          }
-          return true;
-        });
-      };
-
-      return deleteTaskRecursive(prevTasks);
-    });
-  }, []);
-
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }, [tasks]);
 
-  const contextValue = React.useMemo(() => ({
-    tasks,
-    addTask,
-    updateTask,
-    deleteTask,
-  }), [tasks, addTask, updateTask, deleteTask]);
+  const addTask = (task: Omit<Task, 'id'>) => {
+    const newTask: Task = { ...task, id: Date.now().toString() };
+    setTasks([...tasks, newTask]);
+  };
+
+  const updateTask = (updatedTask: Task) => {
+    setTasks(tasks.map(task => task.id === updatedTask.id ? updatedTask : task));
+  };
+
+  const deleteTask = (id: string) => {
+    setTasks(tasks.filter(task => task.id !== id));
+  };
 
   return (
-    <TaskContext.Provider value={contextValue}>
+    <TaskContext.Provider value={{ tasks, addTask, updateTask, deleteTask }}>
       {children}
     </TaskContext.Provider>
   );

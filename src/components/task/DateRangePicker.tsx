@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { TextField, InputAdornment, Box } from '@mui/material';
+import React from 'react';
+import { TextField, InputAdornment } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -17,19 +17,18 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   endDate,
   onChange,
 }) => {
-  const [isSelectingEndDate, setIsSelectingEndDate] = useState(false);
-
   const handleDateChange = (date: Dayjs | null) => {
-    if (!isSelectingEndDate) {
+    if (!startDate || (startDate && endDate)) {
+      // 如果没有开始日期，或者已经选择了开始和结束日期，则重新开始选择
       onChange([date, null]);
-      setIsSelectingEndDate(true);
     } else {
-      if (date && startDate && date.isBefore(startDate)) {
+      // 如果已经有开始日期，则设置结束日期
+      if (date && date.isBefore(startDate)) {
+        // 如果选择的日期早于开始日期，交换它们
         onChange([date, startDate]);
       } else {
         onChange([startDate, date]);
       }
-      setIsSelectingEndDate(false);
     }
   };
 
@@ -44,28 +43,26 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box>
-        <DatePicker
-          value={isSelectingEndDate ? endDate : startDate}
-          onChange={handleDateChange}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              fullWidth
-              size="small"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EventIcon />
-                  </InputAdornment>
-                ),
-              }}
-              placeholder={isSelectingEndDate ? "选择结束日期（可选）" : "选择开始日期"}
-              value={formatDateRange(startDate, endDate)}
-            />
-          )}
-        />
-      </Box>
+      <DatePicker
+        value={startDate}
+        onChange={handleDateChange}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            fullWidth
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <EventIcon />
+                </InputAdornment>
+              ),
+            }}
+            placeholder="选择日期或日期范围"
+            value={formatDateRange(startDate, endDate)}
+          />
+        )}
+      />
     </LocalizationProvider>
   );
 };

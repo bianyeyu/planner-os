@@ -1,0 +1,2745 @@
+文件路径结构图:
+├── copy.py
+├── index.html
+├── output.txt
+├── package-lock.json
+├── package.json
+├── public
+│   ├── index.html
+│   └── vite.svg
+├── README.md
+├── src
+│   ├── App.css
+│   ├── App.tsx
+│   ├── assets
+│   │   └── react.svg
+│   ├── components
+│   │   ├── Calendar.tsx
+│   │   ├── common
+│   │   │   └── Button.tsx
+│   │   ├── habit
+│   │   │   ├── HabitForm.tsx
+│   │   │   └── HabitTracker.tsx
+│   │   ├── layout
+│   │   │   ├── Layout.tsx
+│   │   │   ├── Navbar.tsx
+│   │   │   └── Sidebar.tsx
+│   │   ├── PomodoroStats.tsx
+│   │   ├── PomodoroTimer.tsx
+│   │   ├── task
+│   │   │   ├── DateRangePicker.tsx
+│   │   │   ├── TaskForm.tsx
+│   │   │   └── TaskList.tsx
+│   │   ├── timeBlock
+│   │   │   ├── TimeBlockForm.tsx
+│   │   │   └── TimeBlockList.tsx
+│   │   ├── TimeEntryForm.tsx
+│   │   └── TimeStatistics.tsx
+│   ├── context
+│   │   ├── DailyContext.tsx
+│   │   └── TaskContext.tsx
+│   ├── hooks
+│   │   └── useTask.ts
+│   ├── index.css
+│   ├── index.tsx
+│   ├── main.tsx
+│   ├── pages
+│   │   ├── CalendarView.tsx
+│   │   ├── Daily.tsx
+│   │   ├── Dashboard.tsx
+│   │   ├── HabitManagement.tsx
+│   │   ├── TaskManagement.tsx
+│   │   ├── TimeBlockManagement.tsx
+│   │   └── TimeTracking.tsx
+│   ├── services
+│   │   └── api.ts
+│   ├── store
+│   │   ├── index.ts
+│   │   └── slices
+│   │       └── taskSlice.ts
+│   ├── styles
+│   │   └── global.css
+│   ├── types
+│   │   ├── habit.ts
+│   │   ├── task.ts
+│   │   └── timeBlock.ts
+│   ├── utils
+│   │   └── dateUtils.ts
+│   └── vite-env.d.ts
+├── tailwind.config.js
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
+
+
+----- index.html -----
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planner OS</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
+----- output.txt -----
+
+
+----- package.json -----
+{
+  "name": "planner-os",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^5.16.6",
+    "@mui/material": "^5.16.6",
+    "@mui/x-date-pickers": "^7.12.0",
+    "@mui/x-date-pickers-pro": "^7.12.0",
+    "@types/react-big-calendar": "^1.8.9",
+    "date-fns": "^2.29.3",
+    "dayjs": "^1.11.12",
+    "moment": "^2.30.1",
+    "react": "^18.2.0",
+    "react-big-calendar": "^1.13.1",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.4.0",
+    "recharts": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/date-fns": "^2.6.0",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.9",
+    "@vitejs/plugin-react": "^3.0.0",
+    "typescript": "^4.9.3",
+    "vite": "^4.0.0"
+  }
+}
+
+
+----- README.md -----
+ 
+
+----- tailwind.config.js -----
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+
+----- tsconfig.app.json -----
+{
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src", "src/index.tsx"]
+}
+
+
+----- tsconfig.json -----
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}
+
+----- tsconfig.node.json -----
+{
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "noEmit": true
+  },
+  "include": ["vite.config.ts"]
+}
+
+
+----- vite.config.ts -----
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  css: {
+    modules: {
+      localsConvention: 'camelCaseOnly'
+    }
+  },
+  resolve: {
+    extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.css']
+  }
+})
+
+----- public\index.html -----
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Planner OS - Your personal productivity system"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>Planner OS</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
+
+----- public\vite.svg -----
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="31.88" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 257"><defs><linearGradient id="IconifyId1813088fe1fbc01fb466" x1="-.828%" x2="57.636%" y1="7.652%" y2="78.411%"><stop offset="0%" stop-color="#41D1FF"></stop><stop offset="100%" stop-color="#BD34FE"></stop></linearGradient><linearGradient id="IconifyId1813088fe1fbc01fb467" x1="43.376%" x2="50.316%" y1="2.242%" y2="89.03%"><stop offset="0%" stop-color="#FFEA83"></stop><stop offset="8.333%" stop-color="#FFDD35"></stop><stop offset="100%" stop-color="#FFA800"></stop></linearGradient></defs><path fill="url(#IconifyId1813088fe1fbc01fb466)" d="M255.153 37.938L134.897 252.976c-2.483 4.44-8.862 4.466-11.382.048L.875 37.958c-2.746-4.814 1.371-10.646 6.827-9.67l120.385 21.517a6.537 6.537 0 0 0 2.322-.004l117.867-21.483c5.438-.991 9.574 4.796 6.877 9.62Z"></path><path fill="url(#IconifyId1813088fe1fbc01fb467)" d="M185.432.063L96.44 17.501a3.268 3.268 0 0 0-2.634 3.014l-5.474 92.456a3.268 3.268 0 0 0 3.997 3.378l24.777-5.718c2.318-.535 4.413 1.507 3.936 3.838l-7.361 36.047c-.495 2.426 1.782 4.5 4.151 3.78l15.304-4.649c2.372-.72 4.652 1.36 4.15 3.788l-11.698 56.621c-.732 3.542 3.979 5.473 5.943 2.437l1.313-2.028l72.516-144.72c1.215-2.423-.88-5.186-3.54-4.672l-25.505 4.922c-2.396.462-4.435-1.77-3.759-4.114l16.646-57.705c.677-2.35-1.37-4.583-3.769-4.113Z"></path></svg>
+
+----- src\App.css -----
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+----- src\App.tsx -----
+// src/App.tsx
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import Layout from './components/layout/Layout';
+import Dashboard from './pages/Dashboard';
+import TaskManagement from './pages/TaskManagement';
+import CalendarView from './pages/CalendarView';
+import TimeTracking from './pages/TimeTracking';
+import HabitManagement from './pages/HabitManagement';
+import TimeBlockManagement from './pages/TimeBlockManagement';
+import Daily from './pages/Daily';
+import { TaskProvider } from './context/TaskContext';
+import { DailyProvider } from './context/DailyContext';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#6750A4',
+    },
+    secondary: {
+      main: '#958DA5',
+    },
+    background: {
+      default: '#FFFBFE',
+    },
+  },
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+      },
+    },
+  },
+});
+
+// 移除多余的 });
+// }); 
+
+const App: React.FC = () => {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <TaskProvider>
+          <DailyProvider>
+            <Router>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/daily" replace />} />
+                  <Route path="/daily" element={<Daily />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/tasks" element={<TaskManagement />} />
+                  <Route path="/calendar" element={<CalendarView />} />
+                  <Route path="/time-tracking" element={<TimeTracking />} />
+                  <Route path="/habits" element={<HabitManagement />} />
+                  <Route path="/time-blocks" element={<TimeBlockManagement />} />
+                </Routes>
+              </Layout>
+            </Router>
+          </DailyProvider>
+        </TaskProvider>
+      </LocalizationProvider>
+    </ThemeProvider>
+  );
+};
+
+export default App;
+
+----- src\index.css -----
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+
+----- src\index.tsx -----
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import App from './App';
+import './index.css';
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+
+root.render(
+  <React.StrictMode>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <App />
+    </LocalizationProvider>
+  </React.StrictMode>
+);
+
+----- src\main.tsx -----
+// src/main.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './index.css';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);
+
+----- src\vite-env.d.ts -----
+/// <reference types="vite/client" />
+
+
+----- src\assets\react.svg -----
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
+
+----- src\components\Calendar.tsx -----
+import React, { useState } from 'react';
+import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+// Setup the localizer for BigCalendar
+const localizer = momentLocalizer(moment);
+
+interface CalendarEvent {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  allDay?: boolean;
+}
+
+const Calendar: React.FC = () => {
+  const [events, setEvents] = useState<CalendarEvent[]>([
+    {
+      id: '1',
+      title: 'Project Meeting',
+      start: new Date(2023, 7, 15, 10, 0), // August 15, 2023, 10:00 AM
+      end: new Date(2023, 7, 15, 11, 30), // August 15, 2023, 11:30 AM
+    },
+    {
+      id: '2',
+      title: 'Team Lunch',
+      start: new Date(2023, 7, 16, 12, 0), // August 16, 2023, 12:00 PM
+      end: new Date(2023, 7, 16, 13, 0), // August 16, 2023, 1:00 PM
+    },
+    // Add more sample events as needed
+  ]);
+
+  const handleSelectSlot = (slotInfo: any) => {
+    const title = window.prompt('New Event name');
+    if (title) {
+      const newEvent = {
+        id: String(events.length + 1),
+        title,
+        start: slotInfo.start,
+        end: slotInfo.end,
+        allDay: slotInfo.slots.length === 1,
+      };
+      setEvents([...events, newEvent]);
+    }
+  };
+
+  const handleSelectEvent = (event: CalendarEvent) => {
+    window.alert(event.title);
+  };
+
+  return (
+    <div className="h-full">
+      <BigCalendar
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        style={{ height: 'calc(100vh - 100px)' }}
+        onSelectSlot={handleSelectSlot}
+        onSelectEvent={handleSelectEvent}
+        selectable
+      />
+    </div>
+  );
+};
+
+export default Calendar;
+
+----- src\components\PomodoroStats.tsx -----
+import React from 'react';
+import { Task } from '../types/task';
+
+interface PomodoroSession {
+  duration: number;
+  taskId?: string;
+  timestamp: number;
+}
+
+interface PomodoroStatsProps {
+  sessions: PomodoroSession[];
+  tasks: Task[];
+}
+
+const PomodoroStats: React.FC<PomodoroStatsProps> = ({ sessions, tasks }) => {
+  const totalSessions = sessions.length;
+  const totalTime = sessions.reduce((sum, session) => sum + session.duration, 0);
+
+  const taskStats = tasks.map(task => {
+    const taskSessions = sessions.filter(session => session.taskId === task.id);
+    const taskTime = taskSessions.reduce((sum, session) => sum + session.duration, 0);
+    return {
+      taskId: task.id,
+      taskTitle: task.title,
+      sessionCount: taskSessions.length,
+      totalTime: taskTime,
+    };
+  });
+
+  const formatTime = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${hours}h ${minutes}m`;
+  };
+
+  return (
+    <div className="bg-white shadow-md rounded-lg p-6 max-w-lg mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Pomodoro Statistics</h2>
+      <div className="mb-6">
+        <p>Total Sessions: {totalSessions}</p>
+        <p>Total Time: {formatTime(totalTime)}</p>
+      </div>
+      <h3 className="text-xl font-semibold mb-2">Task Breakdown</h3>
+      <ul className="space-y-2">
+        {taskStats.map(stat => (
+          <li key={stat.taskId} className="border-b pb-2">
+            <p className="font-medium">{stat.taskTitle}</p>
+            <p>Sessions: {stat.sessionCount}</p>
+            <p>Time: {formatTime(stat.totalTime)}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default PomodoroStats;
+
+----- src\components\PomodoroTimer.tsx -----
+import React, { useState, useEffect, useCallback } from 'react';
+import { Task } from '../types/task';
+
+interface PomodoroTimerProps {
+  onTimerComplete: (duration: number, taskId?: string) => void;
+  tasks: Task[];
+}
+
+const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ onTimerComplete, tasks }) => {
+  const [workTime, setWorkTime] = useState(25 * 60); // 25 minutes in seconds
+  const [breakTime, setBreakTime] = useState(5 * 60); // 5 minutes in seconds
+  const [time, setTime] = useState(workTime);
+  const [isActive, setIsActive] = useState(false);
+  const [isBreak, setIsBreak] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
+
+  const resetTimer = useCallback(() => {
+    setTime(isBreak ? breakTime : workTime);
+    setIsActive(false);
+  }, [isBreak, breakTime, workTime]);
+
+  useEffect(() => {
+    let interval: number | undefined;
+
+    if (isActive && time > 0) {
+      interval = setInterval(() => {
+        setTime((prevTime) => prevTime - 1);
+      }, 1000);
+    } else if (time === 0) {
+      onTimerComplete(isBreak ? breakTime : workTime, selectedTaskId);
+      setIsBreak(!isBreak);
+      resetTimer();
+    }
+
+    return () => clearInterval(interval);
+  }, [isActive, time, isBreak, onTimerComplete, selectedTaskId, breakTime, workTime, resetTimer]);
+
+  const toggleTimer = () => {
+    setIsActive(!isActive);
+  };
+
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleWorkTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newWorkTime = parseInt(e.target.value, 10) * 60;
+    setWorkTime(newWorkTime);
+    if (!isBreak) setTime(newWorkTime);
+  };
+
+  const handleBreakTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newBreakTime = parseInt(e.target.value, 10) * 60;
+    setBreakTime(newBreakTime);
+    if (isBreak) setTime(newBreakTime);
+  };
+
+  const handleTaskSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTaskId(e.target.value === 'none' ? undefined : e.target.value);
+  };
+
+  return (
+    <div className="bg-white shadow-md rounded-lg p-6 max-w-sm mx-auto">
+      <h2 className="text-2xl font-bold mb-4 text-center">
+        {isBreak ? 'Break Time' : 'Work Time'}
+      </h2>
+      <div className="text-6xl font-bold mb-8 text-center">{formatTime(time)}</div>
+      <div className="flex justify-center space-x-4 mb-4">
+        <button
+          onClick={toggleTimer}
+          className={`px-4 py-2 rounded-md ${
+            isActive
+              ? 'bg-red-500 hover:bg-red-600 text-white'
+              : 'bg-green-500 hover:bg-green-600 text-white'
+          }`}
+        >
+          {isActive ? 'Pause' : 'Start'}
+        </button>
+        <button
+          onClick={resetTimer}
+          className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-md"
+        >
+          Reset
+        </button>
+      </div>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Work Time (minutes):
+        </label>
+        <input
+          type="number"
+          value={workTime / 60}
+          onChange={handleWorkTimeChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          min="1"
+          max="60"
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Break Time (minutes):
+        </label>
+        <input
+          type="number"
+          value={breakTime / 60}
+          onChange={handleBreakTimeChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          min="1"
+          max="30"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Select Task:
+        </label>
+        <select
+          value={selectedTaskId || 'none'}
+          onChange={handleTaskSelect}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+        >
+          <option value="none">No task selected</option>
+          {tasks.map((task) => (
+            <option key={task.id} value={task.id}>
+              {task.title}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+};
+
+export default PomodoroTimer;
+
+----- src\components\TimeEntryForm.tsx -----
+import React, { useState } from 'react';
+
+interface TimeEntry {
+  id: string;
+  activity: string;
+  category: string;
+  startTime: Date;
+  endTime: Date;
+}
+
+interface TimeEntryFormProps {
+  onSubmit: (entry: Omit<TimeEntry, 'id'>) => void;
+}
+
+const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onSubmit }) => {
+  const [activity, setActivity] = useState('');
+  const [category, setCategory] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({
+      activity,
+      category,
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
+    });
+    // Reset form
+    setActivity('');
+    setCategory('');
+    setStartTime('');
+    setEndTime('');
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label htmlFor="activity" className="block text-sm font-medium text-gray-700">
+          Activity
+        </label>
+        <input
+          type="text"
+          id="activity"
+          value={activity}
+          onChange={(e) => setActivity(e.target.value)}
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        />
+      </div>
+      <div>
+        <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+          Category
+        </label>
+        <input
+          type="text"
+          id="category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        />
+      </div>
+      <div>
+        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">
+          Start Time
+        </label>
+        <input
+          type="datetime-local"
+          id="startTime"
+          value={startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        />
+      </div>
+      <div>
+        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700">
+          End Time
+        </label>
+        <input
+          type="datetime-local"
+          id="endTime"
+          value={endTime}
+          onChange={(e) => setEndTime(e.target.value)}
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        />
+      </div>
+      <button
+        type="submit"
+        className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+      >
+        Record Time Entry
+      </button>
+    </form>
+  );
+};
+
+export default TimeEntryForm;
+
+----- src\components\TimeStatistics.tsx -----
+import React from 'react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+
+interface TimeEntry {
+  id: string;
+  activity: string;
+  category: string;
+  startTime: Date;
+  endTime: Date;
+}
+
+interface TimeStatisticsProps {
+  entries: TimeEntry[];
+}
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+
+const TimeStatistics: React.FC<TimeStatisticsProps> = ({ entries }) => {
+  const calculateTotalTimeByCategory = () => {
+    const categoryTotals: { [key: string]: number } = {};
+    entries.forEach((entry) => {
+      const duration = entry.endTime.getTime() - entry.startTime.getTime();
+      if (categoryTotals[entry.category]) {
+        categoryTotals[entry.category] += duration;
+      } else {
+        categoryTotals[entry.category] = duration;
+      }
+    });
+    return Object.entries(categoryTotals).map(([name, value]) => ({
+      name,
+      value: value / (1000 * 60 * 60), // Convert to hours
+    }));
+  };
+
+  const data = calculateTotalTimeByCategory();
+
+  return (
+    <div className="h-96">
+      <h2 className="text-lg font-semibold mb-4">Time Distribution by Category</h2>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            outerRadius={80}
+            fill="#8884d8"
+            dataKey="value"
+            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip formatter={(value: number) => `${value.toFixed(2)} hours`} />
+          <Legend />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
+export default TimeStatistics;
+
+----- src\components\common\Button.tsx -----
+
+
+----- src\components\habit\HabitForm.tsx -----
+import React, { useState, useEffect } from 'react';
+import { Habit } from '../../types/habit';
+
+interface HabitFormProps {
+  habit?: Habit;
+  onSubmit: (habit: Omit<Habit, 'id' | 'createdAt'>) => void;
+  onCancel: () => void;
+}
+
+const HabitForm: React.FC<HabitFormProps> = ({ habit, onSubmit, onCancel }) => {
+  const [name, setName] = useState(habit?.name || '');
+  const [description, setDescription] = useState(habit?.description || '');
+  const [frequency, setFrequency] = useState<Habit['frequency']>(habit?.frequency || 'daily');
+  const [targetDays, setTargetDays] = useState<number[]>(habit?.targetDays || []);
+
+  useEffect(() => {
+    if (habit) {
+      setName(habit.name);
+      setDescription(habit.description || '');
+      setFrequency(habit.frequency);
+      setTargetDays(habit.targetDays || []);
+    }
+  }, [habit]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({
+      name,
+      description,
+      frequency,
+      targetDays: frequency === 'weekly' ? targetDays : undefined,
+    });
+  };
+
+  const handleTargetDayToggle = (day: number) => {
+    setTargetDays(prev => 
+      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+    );
+  };
+
+  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+        <input
+          type="text"
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+        <textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        ></textarea>
+      </div>
+
+      <div>
+        <label htmlFor="frequency" className="block text-sm font-medium text-gray-700">Frequency</label>
+        <select
+          id="frequency"
+          value={frequency}
+          onChange={(e) => setFrequency(e.target.value as Habit['frequency'])}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        >
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+
+      {frequency === 'weekly' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Target Days</label>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {daysOfWeek.map((day, index) => (
+              <button
+                key={day}
+                type="button"
+                onClick={() => handleTargetDayToggle(index)}
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  targetDays.includes(index)
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-200 text-gray-800'
+                }`}
+              >
+                {day}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-end space-x-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          {habit ? 'Update Habit' : 'Create Habit'}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+export default HabitForm;
+
+----- src\components\habit\HabitTracker.tsx -----
+import React from 'react';
+import { Habit, HabitLog } from '../../types/habit';
+
+interface HabitTrackerProps {
+  habits: Habit[];
+  habitLogs: HabitLog[];
+  onToggleHabit: (habitId: string, date: string, completed: boolean) => void;
+  onEditHabit: (habit: Habit) => void;
+}
+
+const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, habitLogs, onToggleHabit, onEditHabit }) => {
+  const today = new Date();
+  const past7Days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    return date.toISOString().split('T')[0];
+  }).reverse();
+
+  const isHabitCompleted = (habitId: string, date: string) => {
+    return habitLogs.some(log => log.habitId === habitId && log.date === date && log.completed);
+  };
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Habit</th>
+            {past7Days.map(date => (
+              <th key={date} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {new Date(date).toLocaleDateString(undefined, { weekday: 'short' })}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {habits.map(habit => (
+            <tr key={habit.id}>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center">
+                  <div className="text-sm font-medium text-gray-900">{habit.name}</div>
+                  <button
+                    onClick={() => onEditHabit(habit)}
+                    className="ml-2 text-indigo-600 hover:text-indigo-900"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </td>
+              {past7Days.map(date => (
+                <td key={date} className="px-6 py-4 whitespace-nowrap">
+                  <button
+                    onClick={() => onToggleHabit(habit.id, date, !isHabitCompleted(habit.id, date))}
+                    className={`w-6 h-6 rounded-full ${
+                      isHabitCompleted(habit.id, date) ? 'bg-green-500' : 'bg-gray-200'
+                    }`}
+                  >
+                    {isHabitCompleted(habit.id, date) && (
+                      <svg className="w-4 h-4 text-white mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </button>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default HabitTracker;
+
+----- src\components\layout\Layout.tsx -----
+import React, { useState } from 'react';
+import { Box, Drawer, AppBar, Toolbar, IconButton, Typography } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import Sidebar from './Sidebar';
+
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const drawerWidth = 240;
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  return (
+    <Box sx={{ display: 'flex' }}>
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { sm: 'none' } }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap component="div">
+            Planner OS
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        aria-label="mailbox folders"
+      >
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          }}
+        >
+          <Sidebar />
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', sm: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          }}
+          open
+        >
+          <Sidebar />
+        </Drawer>
+      </Box>
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
+      >
+        <Toolbar />
+        {children}
+      </Box>
+    </Box>
+  );
+};
+
+export default Layout;
+
+----- src\components\layout\Navbar.tsx -----
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const Navbar: React.FC = () => {
+  return (
+    <nav className="bg-white shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex">
+            <div className="flex-shrink-0 flex items-center">
+              <Link to="/" className="text-2xl font-bold text-gray-800">Planner OS</Link>
+            </div>
+          </div>
+          <div className="flex items-center">
+            <button className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              <span className="sr-only">View notifications</span>
+              <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </button>
+            <div className="ml-3 relative">
+              <div>
+                <button className="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="user-menu" aria-haspopup="true">
+                  <span className="sr-only">Open user menu</span>
+                  <img className="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;
+
+----- src\components\layout\Sidebar.tsx -----
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { List, ListItem, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import TimerIcon from '@mui/icons-material/Timer';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import ViewWeekIcon from '@mui/icons-material/ViewWeek';
+import TodayIcon from '@mui/icons-material/Today';
+
+const navItems = [
+  { name: 'Daily', path: '/daily', icon: <TodayIcon /> },
+  { name: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
+  { name: 'Tasks', path: '/tasks', icon: <AssignmentIcon /> },
+  { name: 'Calendar', path: '/calendar', icon: <CalendarTodayIcon /> },
+  { name: 'Time Tracking', path: '/time-tracking', icon: <TimerIcon /> },
+  { name: 'Habits', path: '/habits', icon: <EmojiEventsIcon /> },
+  { name: 'Time Blocks', path: '/time-blocks', icon: <ViewWeekIcon /> },
+];
+
+const Sidebar: React.FC = () => {
+  const location = useLocation();
+
+  return (
+    <div>
+      <Toolbar />
+      <List>
+        {navItems.map((item) => (
+          <ListItem
+            button
+            key={item.name}
+            component={Link}
+            to={item.path}
+            selected={location.pathname === item.path}
+          >
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.name} />
+          </ListItem>
+        ))}
+      </List>
+    </div>
+  );
+};
+
+export default Sidebar;
+
+----- src\components\task\DateRangePicker.tsx -----
+import React from 'react';
+import { TextField, InputAdornment } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { Dayjs } from 'dayjs';
+import EventIcon from '@mui/icons-material/Event';
+
+interface DateRangePickerProps {
+  startDate: Dayjs | null;
+  endDate: Dayjs | null;
+  onChange: (dates: [Dayjs | null, Dayjs | null]) => void;
+}
+
+const DateRangePicker: React.FC<DateRangePickerProps> = ({
+  startDate,
+  endDate,
+  onChange,
+}) => {
+  const handleDateChange = (date: Dayjs | null) => {
+    if (!startDate || (startDate && endDate)) {
+      // 如果没有开始日期，或者已经选择了开始和结束日期，则重新开始选择
+      onChange([date, null]);
+    } else {
+      // 如果已经有开始日期，则设置结束日期
+      if (date && date.isBefore(startDate)) {
+        // 如果选择的日期早于开始日期，交换它们
+        onChange([date, startDate]);
+      } else {
+        onChange([startDate, date]);
+      }
+    }
+  };
+
+  const formatDateRange = (start: Dayjs | null, end: Dayjs | null) => {
+    if (start && end) {
+      return `${start.format('YYYY/MM/DD')} - ${end.format('YYYY/MM/DD')}`;
+    } else if (start) {
+      return start.format('YYYY/MM/DD');
+    }
+    return '';
+  };
+
+  return (
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <DatePicker
+        value={startDate}
+        onChange={handleDateChange}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            fullWidth
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <EventIcon />
+                </InputAdornment>
+              ),
+            }}
+            placeholder="选择日期或日期范围"
+            value={formatDateRange(startDate, endDate)}
+          />
+        )}
+      />
+    </LocalizationProvider>
+  );
+};
+
+export default DateRangePicker;
+
+----- src\components\task\TaskForm.tsx -----
+import React, { useState } from 'react';
+import { 
+  TextField, 
+  Select, 
+  MenuItem, 
+  Button, 
+  Box, 
+  Chip, 
+  Grid, 
+  FormControl,
+  InputLabel,
+  SelectChangeEvent,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Typography,
+} from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Task, TaskPriority } from '../../types/task';
+import dayjs, { Dayjs } from 'dayjs';
+
+interface TaskFormProps {
+  task?: Task;
+  onSubmit: (task: Omit<Task, 'id'>) => void;
+  onCancel: () => void;
+}
+
+const TaskForm: React.FC<TaskFormProps> = ({ task, onSubmit, onCancel }) => {
+  const [title, setTitle] = useState(task?.title || '');
+  const [description, setDescription] = useState(task?.description || '');
+  const [priority, setPriority] = useState<TaskPriority>(task?.priority || 'medium');
+  const [startDate, setStartDate] = useState<Dayjs | null>(task?.startDate ? dayjs(task.startDate) : null);
+  const [dueDate, setDueDate] = useState<Dayjs | null>(task?.dueDate ? dayjs(task.dueDate) : null);
+  const [tags, setTags] = useState<string[]>(task?.tags || []);
+  const [newTag, setNewTag] = useState('');
+  const [subTasks, setSubTasks] = useState<Omit<Task, 'id'>[]>(task?.subTasks || []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({
+      title,
+      description,
+      priority,
+      startDate: startDate ? startDate.format('YYYY-MM-DD') : '',
+      dueDate: dueDate ? dueDate.format('YYYY-MM-DD') : '',
+      tags,
+      subTasks,
+    });
+  };
+
+  const handleAddTag = () => {
+    if (newTag && !tags.includes(newTag)) {
+      setTags([...tags, newTag]);
+      setNewTag('');
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleAddSubTask = () => {
+    setSubTasks([...subTasks, {
+      title: '',
+      description: '',
+      priority: 'medium',
+      startDate: '',
+      dueDate: '',
+      tags: [],
+      subTasks: [],
+    }]);
+  };
+
+  const handleSubTaskChange = (index: number, updatedSubTask: Omit<Task, 'id'>) => {
+    const updatedSubTasks = [...subTasks];
+    updatedSubTasks[index] = updatedSubTask;
+    setSubTasks(updatedSubTasks);
+  };
+
+  const handleRemoveSubTask = (index: number) => {
+    setSubTasks(subTasks.filter((_, i) => i !== index));
+  };
+
+  return (
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <form onSubmit={handleSubmit}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              multiline
+              rows={3}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel>Priority</InputLabel>
+              <Select
+                value={priority}
+                label="Priority"
+                onChange={(e: SelectChangeEvent) => setPriority(e.target.value as TaskPriority)}
+              >
+                <MenuItem value="low">Low</MenuItem>
+                <MenuItem value="medium">Medium</MenuItem>
+                <MenuItem value="high">High</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={6}>
+            <DatePicker
+              label="Start Date"
+              value={startDate}
+              onChange={(newValue) => setStartDate(newValue)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <DatePicker
+              label="Due Date"
+              value={dueDate}
+              onChange={(newValue) => setDueDate(newValue)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Add Tag"
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddTag();
+                }
+              }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Box display="flex" flexWrap="wrap" gap={1}>
+              {tags.map((tag, index) => (
+                <Chip
+                  key={index}
+                  label={tag}
+                  onDelete={() => handleRemoveTag(tag)}
+                />
+              ))}
+            </Box>
+          </Grid>
+          <Grid item xs={12}>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Typography variant="subtitle1">Subtasks</Typography>
+              <Button startIcon={<AddIcon />} onClick={handleAddSubTask}>
+                Add Subtask
+              </Button>
+            </Box>
+            <List>
+              {subTasks.map((subTask, index) => (
+                <ListItem key={index}>
+                  <TaskForm
+                    task={subTask as Task}
+                    onSubmit={(updatedSubTask) => handleSubTaskChange(index, updatedSubTask)}
+                    onCancel={() => {}}
+                  />
+                  <IconButton onClick={() => handleRemoveSubTask(index)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItem>
+              ))}
+            </List>
+          </Grid>
+          <Grid item xs={12}>
+            <Box display="flex" justifyContent="flex-end" gap={2}>
+              <Button onClick={onCancel} variant="outlined">
+                Cancel
+              </Button>
+              <Button type="submit" variant="contained" color="primary">
+                {task ? 'Update Task' : 'Create Task'}
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
+      </form>
+    </LocalizationProvider>
+  );
+};
+
+export default TaskForm;
+
+----- src\components\task\TaskList.tsx -----
+import React, { useState } from 'react';
+import { 
+  List, 
+  ListItem, 
+  ListItemText, 
+  Chip, 
+  IconButton,
+  Typography,
+  Collapse,
+} from '@mui/material';
+import { 
+  Edit as EditIcon,
+  ExpandLess,
+  ExpandMore,
+} from '@mui/icons-material';
+import { Task } from '../../types/task';
+
+interface TaskItemProps {
+  task: Task;
+  onTaskClick: (task: Task) => void;
+  level: number;
+}
+
+const TaskItem: React.FC<TaskItemProps> = ({ task, onTaskClick, level }) => {
+  const [open, setOpen] = useState(false);
+
+  const getPriorityColor = (priority: Task['priority']) => {
+    switch (priority) {
+      case 'high': return 'error';
+      case 'medium': return 'warning';
+      case 'low': return 'success';
+    }
+  };
+
+  return (
+    <>
+      <ListItem
+        style={{ paddingLeft: `${level * 20}px` }}
+        secondaryAction={
+          <>
+            {task.subTasks.length > 0 && (
+              <IconButton edge="end" aria-label="expand" onClick={() => setOpen(!open)}>
+                {open ? <ExpandLess /> : <ExpandMore />}
+              </IconButton>
+            )}
+            <IconButton edge="end" aria-label="edit" onClick={() => onTaskClick(task)}>
+              <EditIcon />
+            </IconButton>
+          </>
+        }
+      >
+        <ListItemText
+          primary={
+            <Typography variant="subtitle1" component="div">
+              {task.title}
+              <Chip
+                size="small"
+                label={task.priority}
+                color={getPriorityColor(task.priority)}
+                style={{ marginLeft: '10px' }}
+              />
+            </Typography>
+          }
+          secondary={
+            <>
+              <Typography variant="body2" component="span">
+                {task.startDate} - {task.dueDate}
+              </Typography>
+              <div>
+                {task.tags.map((tag, index) => (
+                  <Chip key={index} label={tag} size="small" style={{ marginRight: 4, marginTop: 4 }} />
+                ))}
+              </div>
+            </>
+          }
+        />
+      </ListItem>
+      {task.subTasks.length > 0 && (
+        <Collapse in={open} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {task.subTasks.map((subTask, index) => (
+              <TaskItem key={index} task={subTask} onTaskClick={onTaskClick} level={level + 1} />
+            ))}
+          </List>
+        </Collapse>
+      )}
+    </>
+  );
+};
+
+interface TaskListProps {
+  tasks: Task[];
+  onTaskClick: (task: Task) => void;
+}
+
+const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskClick }) => {
+  return (
+    <List>
+      {tasks.map((task) => (
+        <TaskItem key={task.id} task={task} onTaskClick={onTaskClick} level={0} />
+      ))}
+    </List>
+  );
+};
+
+export default TaskList;
+
+----- src\components\timeBlock\TimeBlockForm.tsx -----
+import React, { useState, useEffect } from 'react';
+import { TimeBlock } from '../../types/timeBlock';
+import { Task } from '../../types/task';
+
+interface TimeBlockFormProps {
+  timeBlock?: TimeBlock;
+  tasks: Task[];
+  onSubmit: (timeBlock: Omit<TimeBlock, 'id'>) => void;
+  onCancel: () => void;
+}
+
+const TimeBlockForm: React.FC<TimeBlockFormProps> = ({ timeBlock, tasks, onSubmit, onCancel }) => {
+  const [name, setName] = useState(timeBlock?.name || '');
+  const [startTime, setStartTime] = useState(timeBlock?.startTime || '');
+  const [endTime, setEndTime] = useState(timeBlock?.endTime || '');
+  const [type, setType] = useState<TimeBlock['type']>(timeBlock?.type || 'work');
+  const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>(timeBlock?.taskIds || []);
+
+  useEffect(() => {
+    if (timeBlock) {
+      setName(timeBlock.name);
+      setStartTime(timeBlock.startTime);
+      setEndTime(timeBlock.endTime);
+      setType(timeBlock.type);
+      setSelectedTaskIds(timeBlock.taskIds);
+    }
+  }, [timeBlock]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({
+      name,
+      startTime,
+      endTime,
+      type,
+      taskIds: selectedTaskIds,
+    });
+  };
+
+  const handleTaskToggle = (taskId: string) => {
+    setSelectedTaskIds(prev => 
+      prev.includes(taskId) ? prev.filter(id => id !== taskId) : [...prev, taskId]
+    );
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+        <input
+          type="text"
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">Start Time</label>
+        <input
+          type="datetime-local"
+          id="startTime"
+          value={startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700">End Time</label>
+        <input
+          type="datetime-local"
+          id="endTime"
+          value={endTime}
+          onChange={(e) => setEndTime(e.target.value)}
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="type" className="block text-sm font-medium text-gray-700">Type</label>
+        <select
+          id="type"
+          value={type}
+          onChange={(e) => setType(e.target.value as TimeBlock['type'])}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        >
+          <option value="work">Work</option>
+          <option value="break">Break</option>
+          <option value="personal">Personal</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Associated Tasks</label>
+        <div className="mt-2 space-y-2">
+          {tasks.map(task => (
+            <div key={task.id} className="flex items-center">
+              <input
+                type="checkbox"
+                id={`task-${task.id}`}
+                checked={selectedTaskIds.includes(task.id)}
+                onChange={() => handleTaskToggle(task.id)}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              />
+              <label htmlFor={`task-${task.id}`} className="ml-2 block text-sm text-gray-900">
+                {task.title}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-end space-x-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          {timeBlock ? 'Update Time Block' : 'Create Time Block'}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+export default TimeBlockForm;
+
+----- src\components\timeBlock\TimeBlockList.tsx -----
+import React from 'react';
+import { TimeBlockWithTasks } from '../../types/timeBlock';
+
+interface TimeBlockListProps {
+  timeBlocks: TimeBlockWithTasks[];
+  onEditTimeBlock: (timeBlock: TimeBlockWithTasks) => void;
+  onDeleteTimeBlock: (timeBlockId: string) => void;
+}
+
+const TimeBlockList: React.FC<TimeBlockListProps> = ({ timeBlocks, onEditTimeBlock, onDeleteTimeBlock }) => {
+  const getTypeColor = (type: TimeBlockWithTasks['type']) => {
+    switch (type) {
+      case 'work': return 'bg-blue-100 text-blue-800';
+      case 'break': return 'bg-green-100 text-green-800';
+      case 'personal': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {timeBlocks.map(timeBlock => (
+        <div key={timeBlock.id} className="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="px-4 py-5 sm:px-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">{timeBlock.name}</h3>
+            <p className="mt-1 max-w-2xl text-sm text-gray-500">
+              {new Date(timeBlock.startTime).toLocaleString()} - {new Date(timeBlock.endTime).toLocaleString()}
+            </p>
+          </div>
+          <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
+            <dl className="sm:divide-y sm:divide-gray-200">
+              <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">Type</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getTypeColor(timeBlock.type)}`}>
+                    {timeBlock.type}
+                  </span>
+                </dd>
+              </div>
+              <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">Associated Tasks</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  <ul className="border border-gray-200 rounded-md divide-y divide-gray-200">
+                    {timeBlock.tasks.map(task => (
+                      <li key={task.id} className="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                        <div className="w-0 flex-1 flex items-center">
+                          <span className="ml-2 flex-1 w-0 truncate">{task.title}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            </dl>
+          </div>
+          <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+            <button
+              onClick={() => onEditTimeBlock(timeBlock)}
+              className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-2"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => onDeleteTimeBlock(timeBlock.id)}
+              className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default TimeBlockList;
+
+----- src\context\DailyContext.tsx -----
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import dayjs from 'dayjs';
+
+export interface Node {
+  id: string;
+  content: string;
+  level: number;
+}
+
+export interface DailyEntry {
+  date: string;
+  nodes: Node[];
+}
+
+interface DailyContextType {
+  entries: DailyEntry[];
+  setEntries: React.Dispatch<React.SetStateAction<DailyEntry[]>>;
+  selectedNodes: string[];
+  setSelectedNodes: React.Dispatch<React.SetStateAction<string[]>>;
+}
+
+const DailyContext = createContext<DailyContextType | undefined>(undefined);
+
+export const DailyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [entries, setEntries] = useState<DailyEntry[]>([]);
+  const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
+
+  useEffect(() => {
+    const storedEntries = localStorage.getItem('dailyEntries');
+    if (storedEntries) {
+      setEntries(JSON.parse(storedEntries));
+    } else {
+      const today = dayjs().format('YYYY-MM-DD');
+      setEntries([{ date: today, nodes: [{ id: '1', content: '', level: 0 }] }]);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('dailyEntries', JSON.stringify(entries));
+  }, [entries]);
+
+  return (
+    <DailyContext.Provider value={{ entries, setEntries, selectedNodes, setSelectedNodes }}>
+      {children}
+    </DailyContext.Provider>
+  );
+};
+
+export const useDaily = () => {
+  const context = useContext(DailyContext);
+  if (context === undefined) {
+    throw new Error('useDaily must be used within a DailyProvider');
+  }
+  return context;
+};
+
+----- src\context\TaskContext.tsx -----
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import dayjs from 'dayjs';
+
+interface Node {
+  id: string;
+  content: string;
+  level: number;
+}
+
+interface DailyEntry {
+  date: string;
+  nodes: Node[];
+}
+
+interface DailyContextType {
+  entries: DailyEntry[];
+  setEntries: React.Dispatch<React.SetStateAction<DailyEntry[]>>;
+  selectedNodes: string[];
+  setSelectedNodes: React.Dispatch<React.SetStateAction<string[]>>;
+}
+
+const DailyContext = createContext<DailyContextType | undefined>(undefined);
+
+export const DailyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [entries, setEntries] = useState<DailyEntry[]>([]);
+  const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
+
+  useEffect(() => {
+    const storedEntries = localStorage.getItem('dailyEntries');
+    if (storedEntries) {
+      setEntries(JSON.parse(storedEntries));
+    } else {
+      const today = dayjs().format('YYYY-MM-DD');
+      setEntries([{ date: today, nodes: [{ id: '1', content: '', level: 0 }] }]);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('dailyEntries', JSON.stringify(entries));
+  }, [entries]);
+
+  return (
+    <DailyContext.Provider value={{ entries, setEntries, selectedNodes, setSelectedNodes }}>
+      {children}
+    </DailyContext.Provider>
+  );
+};
+
+export const useDaily = () => {
+  const context = useContext(DailyContext);
+  if (context === undefined) {
+    throw new Error('useDaily must be used within a DailyProvider');
+  }
+  return context;
+};
+
+----- src\hooks\useTask.ts -----
+
+
+----- src\pages\CalendarView.tsx -----
+import React from 'react';
+import { Calendar, momentLocalizer, EventProps } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { useTaskContext } from '../context/TaskContext';
+import { Task } from '../types/task';
+import { Box, Typography, CircularProgress } from '@mui/material';
+
+moment.locale('en-GB');
+const localizer = momentLocalizer(moment);
+
+interface CalendarEvent extends EventProps {
+  task: Task;
+}
+
+const CalendarView: React.FC = () => {
+  const { tasks, loading } = useTaskContext();
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  const events: CalendarEvent[] = tasks?.map((task: Task) => ({
+    id: task.id,
+    title: task.title,
+    start: new Date(task.startDate),
+    end: new Date(task.dueDate),
+    allDay: true,
+    task: task
+  })) || [];
+
+  const eventStyleGetter = (event: CalendarEvent) => {
+    let backgroundColor = '#3174ad';
+    switch (event.task.status) {
+      case 'completed':
+        backgroundColor = '#4caf50';
+        break;
+      case 'in-progress':
+        backgroundColor = '#ff9800';
+        break;
+      case 'not-started':
+        backgroundColor = '#f44336';
+        break;
+    }
+    return { style: { backgroundColor } };
+  };
+
+  return (
+    <Box height="500px">
+      <Typography variant="h4" gutterBottom>
+        Calendar View
+      </Typography>
+      <Calendar
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        style={{ height: '100%' }}
+        eventPropGetter={eventStyleGetter}
+        tooltipAccessor={(event: CalendarEvent) => `${event.task.title} - ${event.task.status}`}
+      />
+    </Box>
+  );
+};
+
+export default CalendarView;
+
+----- src\pages\Daily.tsx -----
+import React, { useRef, KeyboardEvent, useEffect } from 'react';
+import { Box, Typography, TextField, IconButton } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import dayjs, { Dayjs } from 'dayjs';
+import { useDaily } from '../context/DailyContext';
+
+const Daily: React.FC = () => {
+  const { entries, setEntries, selectedNodes, setSelectedNodes } = useDaily();
+  const [selectedDate, setSelectedDate] = React.useState<Dayjs>(dayjs());
+  const contentRefs = useRef<{ [key: string]: HTMLTextAreaElement | null }>({});
+  const todayRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Scroll to today's entry
+    const today = dayjs().format('YYYY-MM-DD');
+    const todayEntry = entries.find(entry => entry.date === today);
+    if (todayEntry) {
+      todayRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [entries]);
+
+  const handleDateChange = (newDate: Dayjs | null) => {
+    if (newDate) {
+      setSelectedDate(newDate);
+      const dateString = newDate.format('YYYY-MM-DD');
+      if (!entries.some(entry => entry.date === dateString)) {
+        setEntries(prevEntries => [...prevEntries, { date: dateString, nodes: [{ id: '1', content: '', level: 0 }] }]);
+      }
+    }
+  };
+
+  const handleContentChange = (date: string, nodeId: string, newContent: string) => {
+    setEntries(prevEntries =>
+      prevEntries.map(entry =>
+        entry.date === date
+          ? {
+              ...entry,
+              nodes: entry.nodes.map(node =>
+                node.id === nodeId ? { ...node, content: newContent } : node
+              )
+            }
+          : entry
+      )
+    );
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>, date: string, nodeId: string, index: number) => {
+    const entry = entries.find(e => e.date === date);
+    if (!entry) return;
+
+    const currentNode = entry.nodes[index];
+    const input = contentRefs.current[`${date}-${nodeId}`];
+    if (!input) return;
+
+    const cursorAtStart = input.selectionStart === 0;
+    const cursorAtEnd = input.selectionEnd === currentNode.content.length;
+
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      const newNode = {
+        id: Date.now().toString(),
+        content: '',
+        level: currentNode.level,
+      };
+      setEntries(prevEntries =>
+        prevEntries.map(entry =>
+          entry.date === date
+            ? {
+                ...entry,
+                nodes: [
+                  ...entry.nodes.slice(0, index + 1),
+                  newNode,
+                  ...entry.nodes.slice(index + 1),
+                ]
+              }
+            : entry
+        )
+      );
+      // Focus on the new node after state update
+      setTimeout(() => {
+        contentRefs.current[`${date}-${newNode.id}`]?.focus();
+      }, 0);
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      if (e.shiftKey && index > 0) {
+        // Outdent
+        setEntries(prevEntries =>
+          prevEntries.map(entry =>
+            entry.date === date
+              ? {
+                  ...entry,
+                  nodes: entry.nodes.map((node, i) =>
+                    i === index ? { ...node, level: Math.max(0, node.level - 1) } : node
+                  )
+                }
+              : entry
+          )
+        );
+      } else if (!e.shiftKey && index > 0) {
+        // Indent
+        const prevNodeLevel = entry.nodes[index - 1].level;
+        setEntries(prevEntries =>
+          prevEntries.map(entry =>
+            entry.date === date
+              ? {
+                  ...entry,
+                  nodes: entry.nodes.map((node, i) =>
+                    i === index ? { ...node, level: Math.min(prevNodeLevel + 1, node.level + 1) } : node
+                  )
+                }
+              : entry
+          )
+        );
+      }
+    } else if (e.key === 'Backspace' && currentNode.content === '' && index > 0) {
+      e.preventDefault();
+      setEntries(prevEntries =>
+        prevEntries.map(entry =>
+          entry.date === date
+            ? {
+                ...entry,
+                nodes: entry.nodes.filter((_, i) => i !== index)
+              }
+            : entry
+        )
+      );
+      // Focus on the previous node
+      setTimeout(() => {
+        const prevNode = entry.nodes[index - 1];
+        contentRefs.current[`${date}-${prevNode.id}`]?.focus();
+      }, 0);
+    } else if ((e.key === 'ArrowUp' && cursorAtStart) || (e.key === 'ArrowDown' && cursorAtEnd)) {
+      e.preventDefault();
+      const targetIndex = e.key === 'ArrowUp' ? index - 1 : index + 1;
+      const targetNode = entry.nodes[targetIndex];
+      if (targetNode) {
+        contentRefs.current[`${date}-${targetNode.id}`]?.focus();
+      }
+    } else if ((e.key === 'ArrowLeft' && cursorAtStart) || (e.key === 'ArrowRight' && cursorAtEnd)) {
+      e.preventDefault();
+      const targetIndex = e.key === 'ArrowLeft' ? index - 1 : index + 1;
+      const targetNode = entry.nodes[targetIndex];
+      if (targetNode) {
+        const targetInput = contentRefs.current[`${date}-${targetNode.id}`];
+        if (targetInput) {
+          targetInput.focus();
+          if (e.key === 'ArrowLeft') {
+            targetInput.selectionStart = targetInput.selectionEnd = targetInput.value.length;
+          } else {
+            targetInput.selectionStart = targetInput.selectionEnd = 0;
+          }
+        }
+      }
+    }
+  };
+
+  const handleMouseDown = (date: string, nodeId: string, e: React.MouseEvent) => {
+    if (e.shiftKey && selectedNodes.length > 0) {
+      // 多选逻辑
+      const entry = entries.find(e => e.date === date);
+      if (entry) {
+        const startIndex = entry.nodes.findIndex(n => n.id === selectedNodes[0]);
+        const endIndex = entry.nodes.findIndex(n => n.id === nodeId);
+        const newSelectedNodes = entry.nodes
+          .slice(Math.min(startIndex, endIndex), Math.max(startIndex, endIndex) + 1)
+          .map(n => n.id);
+        setSelectedNodes(newSelectedNodes);
+      }
+    } else {
+      setSelectedNodes([nodeId]);
+    }
+  };
+
+  // Sort entries by date in descending order
+  const sortedEntries = [...entries].sort((a, b) => dayjs(b.date).diff(dayjs(a.date)));
+
+  return (
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Box sx={{ p: 3 }}>
+        <Box sx={{ position: 'sticky', top: 0, background: 'white', zIndex: 1, pb: 2 }}>
+          <DatePicker
+            value={selectedDate}
+            onChange={handleDateChange}
+            renderInput={(params) => <IconButton {...params}><ArrowDropDownIcon /></IconButton>}
+          />
+        </Box>
+        {sortedEntries.map((entry) => (
+          <Box 
+            key={entry.date} 
+            sx={{ mb: 4 }} 
+            ref={entry.date === dayjs().format('YYYY-MM-DD') ? todayRef : null}
+          >
+            <Typography variant="h4" gutterBottom>
+              {dayjs(entry.date).format('MMM D, YYYY')}
+            </Typography>
+            {entry.nodes.map((node, index) => (
+              <Box 
+                key={node.id} 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'flex-start', 
+                  ml: node.level * 2,
+                  bgcolor: selectedNodes.includes(node.id) ? 'action.selected' : 'transparent',
+                }}
+                onMouseDown={(e) => handleMouseDown(entry.date, node.id, e)}
+              >
+                <FiberManualRecordIcon sx={{ fontSize: 8, mt: 2, mr: 1, color: 'text.secondary' }} />
+                <TextField
+                  inputRef={el => contentRefs.current[`${entry.date}-${node.id}`] = el}
+                  value={node.content}
+                  onChange={(e) => handleContentChange(entry.date, node.id, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, entry.date, node.id, index)}
+                  fullWidth
+                  multiline
+                  variant="standard"
+                  InputProps={{
+                    disableUnderline: true,
+                    style: { fontSize: '16px', lineHeight: '1.5' }
+                  }}
+                  placeholder={index === 0 ? "Type / for options" : ""}
+                />
+              </Box>
+            ))}
+          </Box>
+        ))}
+      </Box>
+    </LocalizationProvider>
+  );
+};
+
+export default Daily;
+
+----- src\pages\Dashboard.tsx -----
+import React from 'react';
+import { Grid, Paper, Typography, Box } from '@mui/material';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+const data = [
+  { name: 'Mon', tasks: 4 },
+  { name: 'Tue', tasks: 3 },
+  { name: 'Wed', tasks: 2 },
+  { name: 'Thu', tasks: 5 },
+  { name: 'Fri', tasks: 1 },
+  { name: 'Sat', tasks: 6 },
+  { name: 'Sun', tasks: 3 },
+];
+
+const Dashboard: React.FC = () => {
+  return (
+    <Box sx={{ flexGrow: 1 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Dashboard
+      </Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Tasks Overview
+            </Typography>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="tasks" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Recent Activities
+            </Typography>
+            {/* Add a list of recent activities here */}
+          </Paper>
+        </Grid>
+        {/* Add more dashboard widgets here */}
+      </Grid>
+    </Box>
+  );
+};
+
+export default Dashboard;
+
+----- src\pages\HabitManagement.tsx -----
+import React, { useState, useEffect } from 'react';
+import HabitForm from '../components/habit/HabitForm';
+import HabitTracker from '../components/habit/HabitTracker';
+import { Habit, HabitLog } from '../types/habit';
+
+const HabitManagement: React.FC = () => {
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [habitLogs, setHabitLogs] = useState<HabitLog[]>([]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined);
+
+  useEffect(() => {
+    const storedHabits = localStorage.getItem('habits');
+    const storedHabitLogs = localStorage.getItem('habitLogs');
+    if (storedHabits) setHabits(JSON.parse(storedHabits));
+    if (storedHabitLogs) setHabitLogs(JSON.parse(storedHabitLogs));
+  }, []);
+
+  const saveHabits = (newHabits: Habit[]) => {
+    setHabits(newHabits);
+    localStorage.setItem('habits', JSON.stringify(newHabits));
+  };
+
+  const saveHabitLogs = (newHabitLogs: HabitLog[]) => {
+    setHabitLogs(newHabitLogs);
+    localStorage.setItem('habitLogs', JSON.stringify(newHabitLogs));
+  };
+
+  const handleHabitSubmit = (habitData: Omit<Habit, 'id' | 'createdAt'>) => {
+    if (editingHabit) {
+      const updatedHabits = habits.map(h =>
+        h.id === editingHabit.id ? { ...h, ...habitData } : h
+      );
+      saveHabits(updatedHabits);
+    } else {
+      const newHabit: Habit = {
+        ...habitData,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+      };
+      saveHabits([...habits, newHabit]);
+    }
+    setIsFormOpen(false);
+    setEditingHabit(undefined);
+  };
+
+  const handleToggleHabit = (habitId: string, date: string, completed: boolean) => {
+    const existingLog = habitLogs.find(log => log.habitId === habitId && log.date === date);
+    if (existingLog) {
+      const updatedLogs = habitLogs.map(log =>
+        log.id === existingLog.id ? { ...log, completed } : log
+      );
+      saveHabitLogs(updatedLogs);
+    } else {
+      const newLog: HabitLog = {
+        id: Date.now().toString(),
+        habitId,
+        date,
+        completed,
+      };
+      saveHabitLogs([...habitLogs, newLog]);
+    }
+  };
+
+  const handleEditHabit = (habit: Habit) => {
+    setEditingHabit(habit);
+    setIsFormOpen(true);
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Habit Management</h1>
+      <button
+        onClick={() => setIsFormOpen(true)}
+        className="mb-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+      >
+        Add New Habit
+      </button>
+      {isFormOpen && (
+        <div className="mb-8">
+          <HabitForm
+            habit={editingHabit}
+            onSubmit={handleHabitSubmit}
+            onCancel={() => {
+              setIsFormOpen(false);
+              setEditingHabit(undefined);
+            }}
+          />
+        </div>
+      )}
+      <HabitTracker
+        habits={habits}
+        habitLogs={habitLogs}
+        onToggleHabit={handleToggleHabit}
+        onEditHabit={handleEditHabit}
+      />
+    </div>
+  );
+};
+
+export default HabitManagement;
+
+----- src\pages\TaskManagement.tsx -----
+import React, { useState } from 'react';
+import { Button, Box, Dialog, DialogTitle, DialogContent } from '@mui/material';
+import TaskForm from '../components/task/TaskForm';
+import TaskList from '../components/task/TaskList';
+import { Task } from '../types/task';
+import { useTaskContext } from '../context/TaskContext';
+
+const TaskManagement: React.FC = () => {
+  const { tasks, addTask, updateTask } = useTaskContext();
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleTaskSubmit = (taskData: Omit<Task, 'id'>) => {
+    if (editingTask) {
+      updateTask({ ...taskData, id: editingTask.id });
+    } else {
+      addTask(taskData);
+    }
+    handleCloseDialog();
+  };
+
+  const handleTaskClick = (task: Task) => {
+    setEditingTask(task);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setEditingTask(null);
+    setIsDialogOpen(false);
+  };
+
+  const handleAddNewTask = () => {
+    setEditingTask(null);
+    setIsDialogOpen(true);
+  };
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <h1>Task Management</h1>
+      <Button onClick={handleAddNewTask} variant="contained" color="primary" sx={{ mb: 2 }}>
+        Add New Task
+      </Button>
+      <TaskList tasks={tasks} onTaskClick={handleTaskClick} />
+      <Dialog open={isDialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+        <DialogTitle>{editingTask ? 'Edit Task' : 'Add New Task'}</DialogTitle>
+        <DialogContent>
+          <TaskForm
+            task={editingTask || undefined}
+            onSubmit={handleTaskSubmit}
+            onCancel={handleCloseDialog}
+          />
+        </DialogContent>
+      </Dialog>
+    </Box>
+  );
+};
+
+export default TaskManagement;
+
+----- src\pages\TimeBlockManagement.tsx -----
+import React, { useState, useEffect } from 'react';
+import TimeBlockForm from '../components/timeBlock/TimeBlockForm';
+import TimeBlockList from '../components/timeBlock/TimeBlockList';
+import { TimeBlock, TimeBlockWithTasks } from '../types/timeBlock';
+import { Task } from '../types/task';
+
+const TimeBlockManagement: React.FC = () => {
+  const [timeBlocks, setTimeBlocks] = useState<TimeBlockWithTasks[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingTimeBlock, setEditingTimeBlock] = useState<TimeBlockWithTasks | undefined>(undefined);
+
+  useEffect(() => {
+    const storedTimeBlocks = localStorage.getItem('timeBlocks');
+    const storedTasks = localStorage.getItem('tasks');
+    if (storedTimeBlocks) setTimeBlocks(JSON.parse(storedTimeBlocks));
+    if (storedTasks) setTasks(JSON.parse(storedTasks));
+  }, []);
+
+  const saveTimeBlocks = (newTimeBlocks: TimeBlockWithTasks[]) => {
+    setTimeBlocks(newTimeBlocks);
+    localStorage.setItem('timeBlocks', JSON.stringify(newTimeBlocks));
+  };
+
+  const handleTimeBlockSubmit = (timeBlockData: Omit<TimeBlock, 'id'>) => {
+    if (editingTimeBlock) {
+      const updatedTimeBlocks = timeBlocks.map(tb =>
+        tb.id === editingTimeBlock.id 
+          ? { ...tb, ...timeBlockData, id: tb.id, tasks: tasks.filter(task => timeBlockData.taskIds.includes(task.id)) } 
+          : tb
+      );
+      saveTimeBlocks(updatedTimeBlocks);
+    } else {
+      const newTimeBlock: TimeBlockWithTasks = {
+        ...timeBlockData,
+        id: Date.now().toString(),
+        tasks: tasks.filter(task => timeBlockData.taskIds.includes(task.id)),
+      };
+      saveTimeBlocks([...timeBlocks, newTimeBlock]);
+    }
+    setIsFormOpen(false);
+    setEditingTimeBlock(undefined);
+  };
+
+  const handleEditTimeBlock = (timeBlock: TimeBlockWithTasks) => {
+    setEditingTimeBlock(timeBlock);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteTimeBlock = (timeBlockId: string) => {
+    const updatedTimeBlocks = timeBlocks.filter(tb => tb.id !== timeBlockId);
+    saveTimeBlocks(updatedTimeBlocks);
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Time Block Management</h1>
+      <button
+        onClick={() => {
+          setIsFormOpen(true);
+          setEditingTimeBlock(undefined);
+        }}
+        className="mb-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+      >
+        Add New Time Block
+      </button>
+      {isFormOpen && (
+        <div className="mb-8">
+          <TimeBlockForm
+            timeBlock={editingTimeBlock}
+            tasks={tasks}
+            onSubmit={handleTimeBlockSubmit}
+            onCancel={() => {
+              setIsFormOpen(false);
+              setEditingTimeBlock(undefined);
+            }}
+          />
+        </div>
+      )}
+      <TimeBlockList
+        timeBlocks={timeBlocks}
+        onEditTimeBlock={handleEditTimeBlock}
+        onDeleteTimeBlock={handleDeleteTimeBlock}
+      />
+    </div>
+  );
+};
+
+export default TimeBlockManagement;
+
+----- src\pages\TimeTracking.tsx -----
+import React, { useState } from 'react';
+import TimeEntryForm from '../components/TimeEntryForm';
+import TimeStatistics from '../components/TimeStatistics';
+
+interface TimeEntry {
+  id: string;
+  activity: string;
+  category: string;
+  startTime: Date;
+  endTime: Date;
+}
+
+const TimeTracking: React.FC = () => {
+  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
+
+  const handleSubmit = (entry: Omit<TimeEntry, 'id'>) => {
+    const newEntry: TimeEntry = {
+      ...entry,
+      id: Date.now().toString(),
+    };
+    setTimeEntries([...timeEntries, newEntry]);
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-semibold mb-6">Lioubov Time Tracking</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Record Time Entry</h2>
+          <TimeEntryForm onSubmit={handleSubmit} />
+        </div>
+        <div>
+          <TimeStatistics entries={timeEntries} />
+        </div>
+      </div>
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Recent Time Entries</h2>
+        <ul className="divide-y divide-gray-200">
+          {timeEntries.map((entry) => (
+            <li key={entry.id} className="py-4">
+              <div className="flex justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{entry.activity}</p>
+                  <p className="text-sm text-gray-500">{entry.category}</p>
+                </div>
+                <div className="text-sm text-gray-500">
+                  {entry.startTime.toLocaleString()} - {entry.endTime.toLocaleString()}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default TimeTracking;
+
+----- src\services\api.ts -----
+
+
+----- src\store\index.ts -----
+
+
+----- src\store\slices\taskSlice.ts -----
+
+
+----- src\styles\global.css -----
+
+
+----- src\types\habit.ts -----
+export interface Habit {
+    id: string;
+    name: string;
+    description?: string;
+    frequency: 'daily' | 'weekly' | 'monthly';
+    targetDays?: number[]; // For weekly habits, 0 = Sunday, 1 = Monday, etc.
+    createdAt: string;
+    archivedAt?: string;
+  }
+  
+  export interface HabitLog {
+    id: string;
+    habitId: string;
+    date: string;
+    completed: boolean;
+  }
+
+----- src\types\task.ts -----
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  priority: 'low' | 'medium' | 'high';
+  startDate: string;
+  dueDate: string;
+  tags: string[];
+  subTasks: Task[];
+}
+
+export type TaskPriority = Task['priority'];
+
+----- src\types\timeBlock.ts -----
+import { Task } from './task';
+
+export interface TimeBlock {
+  id: string;
+  name: string;
+  startTime: string; // ISO string
+  endTime: string; // ISO string
+  type: 'work' | 'break' | 'personal';
+  taskIds: string[];
+}
+
+export interface TimeBlockWithTasks extends TimeBlock {
+  tasks: Task[];
+}
+
+----- src\utils\dateUtils.ts -----
+
+
