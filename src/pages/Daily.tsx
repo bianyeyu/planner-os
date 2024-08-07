@@ -1,5 +1,5 @@
 import React, { useRef, KeyboardEvent, useEffect, useState } from 'react';
-import { Box, Typography, TextField, IconButton, Drawer } from '@mui/material';
+import { Box, Typography, TextField, IconButton, Drawer, List, ListItem, ListItemText } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -27,6 +27,7 @@ const Daily: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [slashMenuOpen, setSlashMenuOpen] = useState(false);
   const [slashMenuPosition, setSlashMenuPosition] = useState({ top: 0, left: 0 });
+  const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('Daily useEffect running');
@@ -62,6 +63,26 @@ const Daily: React.FC = () => {
           : entry
       )
     );
+
+    const input = contentRefs.current[`${date}-${nodeId}`];
+    if (input) {
+      const cursorPosition = input.selectionStart;
+      const textBeforeCursor = newContent.slice(0, cursorPosition);
+      const lastSlashIndex = textBeforeCursor.lastIndexOf('/');
+
+      if (lastSlashIndex === -1 || cursorPosition !== lastSlashIndex + 1) {
+        setSlashMenuOpen(false);
+      } else {
+        const rect = input.getBoundingClientRect();
+        const lineHeight = parseInt(getComputedStyle(input).lineHeight);
+        const lines = textBeforeCursor.split('\n');
+        const currentLineIndex = lines.length - 1;
+        const top = rect.top + window.scrollY + lineHeight * (currentLineIndex + 1);
+        const left = rect.left + window.scrollX + (lines[currentLineIndex].length * 8); // Approximation for character width
+        setSlashMenuPosition({ top, left });
+        setSlashMenuOpen(true);
+      }
+    }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>, date: string, nodeId: string, index: number) => {
@@ -167,11 +188,6 @@ const Daily: React.FC = () => {
           }
         }
       }
-    } else if (e.key === '/') {
-      e.preventDefault();
-      const rect = e.currentTarget.getBoundingClientRect();
-      setSlashMenuPosition({ top: rect.bottom, left: rect.left });
-      setSlashMenuOpen(true);
     }
   };
 
@@ -181,6 +197,12 @@ const Daily: React.FC = () => {
     } else {
       setSelectedNodes([nodeId]);
     }
+    setActiveNodeId(nodeId);
+  };
+
+  const handleNodeBlur = () => {
+    setActiveNodeId(null);
+    setSlashMenuOpen(false);
   };
 
   const sortedEntries = [...entries].sort((a: DailyEntry, b: DailyEntry) => dayjs(b.date).diff(dayjs(a.date)));
@@ -230,6 +252,7 @@ const Daily: React.FC = () => {
                       value={node.content}
                       onChange={(e) => handleContentChange(entry.date, node.id, e.target.value)}
                       onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => handleKeyDown(e, entry.date, node.id, index)}
+                      onBlur={handleNodeBlur}
                       fullWidth
                       multiline
                       variant="standard"
@@ -262,7 +285,7 @@ const Daily: React.FC = () => {
               <TaskList tasks={tasks} onTaskClick={() => {}} />
             </Box>
           </Drawer>
-          {slashMenuOpen && (
+          {slashMenuOpen && activeNodeId && (
             <Box
               sx={{
                 position: 'absolute',
@@ -274,9 +297,11 @@ const Daily: React.FC = () => {
                 zIndex: 1300,
               }}
             >
-              <Typography>添加任务</Typography>
-              <Typography>插入日期</Typography>
-              <Typography>插入待办事项</Typography>
+              <List>
+                <ListItem button>
+                  <ListItemText primary="Insert date" />
+                </ListItem>
+              </List>
             </Box>
           )}
         </Box>
