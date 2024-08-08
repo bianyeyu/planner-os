@@ -1,0 +1,34 @@
+{
+    "dashboard": {
+      "greeting": "Good morning, {{username}}",
+      "todayTasks": "Today's Tasks",
+      "allDayTasks": "All Day Tasks",
+      "timeRecords": "Today's Time Records"
+    },
+    "settings": {
+      "title": "Settings",
+      "personalInfo": "Personal Information",
+      "username": "Username",
+      "email": "Email Address",
+      "changePassword": "Change Password",
+      "notifications": "Notification Settings",
+      "emailNotifications": "Email Notifications",
+      "inAppNotifications": "In-App Notifications",
+      "pushNotifications": "Push Notifications",
+      "themeSettings": "Theme Settings",
+      "darkMode": "Dark Mode",
+      "lightMode": "Light Mode",
+      "systemMode": "Follow System",
+      "languageSettings": "Language Settings",
+      "chinese": "Chinese",
+      "english": "English",
+      "saveChanges": "Save Changes"
+    },
+    "navigation": {
+      "home": "Home",
+      "calendar": "Calendar",
+      "statistics": "Statistics",
+      "team": "Team",
+      "settings": "Settings"
+    }
+  }

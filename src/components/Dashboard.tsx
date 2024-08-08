@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Typography, IconButton, Button, useTheme } from '@mui/material';
+import { Box, Typography, IconButton, Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -8,7 +8,6 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
-  const theme = useTheme();
 
   const tasks = [
     { time: '09:00', task: '团队晨会' },
@@ -29,34 +28,34 @@ const Dashboard: React.FC = () => {
   const filters = ['全部任务', '优先级高', '今日截止', '未完成', '已完成'];
 
   return (
-    <Box sx={{ display: 'flex', height: '100%' }}>
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ display: 'flex', height: '100%', position: 'relative' }}>
+      <Box sx={{ flex: 1, mr: rightSidebarOpen ? '220px' : 0, transition: 'margin-right 0.3s' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
           <Typography variant="h4">{t('dashboard.greeting', { username: '用户名' })}</Typography>
           <IconButton 
-            sx={{ bgcolor: theme.palette.primary.main, color: theme.palette.primary.contrastText }}
+            sx={{ bgcolor: '#6750A4', color: 'white' }}
             onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
           >
-            {rightSidebarOpen ? <ChevronRightIcon /> : <ChevronRightIcon />}
+            {rightSidebarOpen ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
         </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', flexGrow: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           {/* Left Timeline */}
           <Box sx={{ width: '48%' }}>
             <Typography variant="h5" sx={{ mb: 2 }}>{t('dashboard.todayTasks')}</Typography>
-            <Box sx={{ bgcolor: theme.palette.background.paper, p: 2, mb: 3, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ bgcolor: '#E8DEF8', p: 2, mb: 3, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Typography>{t('dashboard.allDayTasks')}</Typography>
               <ExpandMoreIcon />
             </Box>
-            <Box sx={{ position: 'relative', pl: 4, height: 'calc(100% - 100px)' }}>
-              <Box sx={{ position: 'absolute', left: 8, top: 0, bottom: 50, width: 2, bgcolor: theme.palette.primary.main }} />
+            <Box sx={{ position: 'relative', pl: 4 }}>
+              <Box sx={{ position: 'absolute', left: 8, top: 0, bottom: 50, width: 2, bgcolor: '#6750A4' }} />
               {tasks.map((task, index) => (
                 <Box key={index} sx={{ mb: 4, display: 'flex', alignItems: 'center' }}>
                   <Box sx={{ 
                     width: 16, 
                     height: 16, 
                     borderRadius: '50%', 
-                    bgcolor: theme.palette.primary.main, 
+                    bgcolor: '#6750A4', 
                     position: 'absolute',
                     left: 2,
                     marginTop: '3px'
@@ -69,9 +68,9 @@ const Dashboard: React.FC = () => {
                   position: 'absolute', 
                   left: -4, 
                   bottom: 0, 
-                  bgcolor: theme.palette.primary.main, 
-                  color: theme.palette.primary.contrastText,
-                  '&:hover': { bgcolor: theme.palette.primary.dark }
+                  bgcolor: '#6750A4', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#5c4593' }
                 }}
               >
                 <AddIcon />
@@ -82,15 +81,15 @@ const Dashboard: React.FC = () => {
           {/* Right Timeline */}
           <Box sx={{ width: '48%' }}>
             <Typography variant="h5" sx={{ mb: 2 }}>{t('dashboard.timeRecords')}</Typography>
-            <Box sx={{ position: 'relative', pl: 4, height: 'calc(100% - 60px)' }}>
-              <Box sx={{ position: 'absolute', left: 8, top: 0, bottom: 50, width: 2, bgcolor: theme.palette.secondary.main }} />
+            <Box sx={{ position: 'relative', pl: 4 }}>
+              <Box sx={{ position: 'absolute', left: 8, top: 0, bottom: 50, width: 2, bgcolor: '#03DAC6' }} />
               {timeRecords.map((record, index) => (
                 <Box key={index} sx={{ mb: 4, position: 'relative' }}>
                   <Box sx={{ 
                     width: 16, 
                     height: 16, 
                     borderRadius: '50%', 
-                    bgcolor: theme.palette.secondary.main, 
+                    bgcolor: '#03DAC6', 
                     position: 'absolute',
                     left: 2,
                     top: 12,
@@ -100,7 +99,7 @@ const Dashboard: React.FC = () => {
                     ml: 3,
                     height: 40, 
                     width: 'calc(100% - 24px)', 
-                    bgcolor: theme.palette.action.hover,
+                    bgcolor: 'rgba(3, 218, 198, 0.2)',
                     borderRadius: 1,
                     display: 'flex',
                     alignItems: 'center',
@@ -115,9 +114,9 @@ const Dashboard: React.FC = () => {
                   position: 'absolute', 
                   left: -4, 
                   bottom: 0, 
-                  bgcolor: theme.palette.secondary.main, 
-                  color: theme.palette.secondary.contrastText,
-                  '&:hover': { bgcolor: theme.palette.secondary.dark }
+                  bgcolor: '#03DAC6', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#02b9a5' }
                 }}
               >
                 <AddIcon />
@@ -128,53 +127,56 @@ const Dashboard: React.FC = () => {
       </Box>
 
       {/* Right Sidebar */}
-      {rightSidebarOpen && (
-        <Box sx={{ 
-          width: 220, 
-          bgcolor: theme.palette.background.paper, 
-          py: 2, 
-          px: 1, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          borderLeft: `1px solid ${theme.palette.divider}`,
-          overflow: 'auto'
-        }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>切换视图</Typography>
-          {views.map((view, index) => (
-            <Button
-              key={index}
-              variant={index === 0 ? "contained" : "outlined"}
-              sx={{
-                mb: 1,
-                bgcolor: index === 0 ? theme.palette.primary.main : 'transparent',
-                color: index === 0 ? theme.palette.primary.contrastText : theme.palette.text.primary,
-                border: index === 0 ? 'none' : `1px solid ${theme.palette.divider}`,
-                borderRadius: '20px',
-                '&:hover': { bgcolor: index === 0 ? theme.palette.primary.dark : theme.palette.action.hover },
-              }}
-            >
-              {view}
-            </Button>
-          ))}
-          <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>切换筛选</Typography>
-          {filters.map((filter, index) => (
-            <Button
-              key={index}
-              variant={index === 0 ? "contained" : "outlined"}
-              sx={{
-                mb: 1,
-                bgcolor: index === 0 ? theme.palette.primary.main : 'transparent',
-                color: index === 0 ? theme.palette.primary.contrastText : theme.palette.text.primary,
-                border: index === 0 ? 'none' : `1px solid ${theme.palette.divider}`,
-                borderRadius: '20px',
-                '&:hover': { bgcolor: index === 0 ? theme.palette.primary.dark : theme.palette.action.hover },
-              }}
-            >
-              {filter}
-            </Button>
-          ))}
-        </Box>
-      )}
+      <Box sx={{ 
+        position: 'absolute',
+        right: 0,
+        top: 0,
+        bottom: 0,
+        width: rightSidebarOpen ? 220 : 0,
+        bgcolor: 'white', 
+        py: 2, 
+        px: rightSidebarOpen ? 1 : 0, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        borderLeft: '1px solid #e0e0e0',
+        transition: 'width 0.3s, padding 0.3s',
+        overflow: 'hidden'
+      }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>切换视图</Typography>
+        {views.map((view, index) => (
+          <Button
+            key={index}
+            variant={index === 0 ? "contained" : "outlined"}
+            sx={{
+              mb: 1,
+              bgcolor: index === 0 ? '#E8DEF8' : 'white',
+              color: '#1C1B1F',
+              border: index === 0 ? 'none' : '1px solid #CAC4D0',
+              borderRadius: '20px',
+              '&:hover': { bgcolor: index === 0 ? '#E8DEF8' : 'white' },
+            }}
+          >
+            {view}
+          </Button>
+        ))}
+        <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>切换筛选</Typography>
+        {filters.map((filter, index) => (
+          <Button
+            key={index}
+            variant={index === 0 ? "contained" : "outlined"}
+            sx={{
+              mb: 1,
+              bgcolor: index === 0 ? '#E8DEF8' : 'white',
+              color: '#1C1B1F',
+              border: index === 0 ? 'none' : '1px solid #CAC4D0',
+              borderRadius: '20px',
+              '&:hover': { bgcolor: index === 0 ? '#E8DEF8' : 'white' },
+            }}
+          >
+            {filter}
+          </Button>
+        ))}
+      </Box>
     </Box>
   );
 };

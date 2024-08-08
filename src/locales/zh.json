@@ -1,0 +1,34 @@
+{
+    "dashboard": {
+      "greeting": "早上好，{{username}}",
+      "todayTasks": "今日待办事项",
+      "allDayTasks": "全天任务",
+      "timeRecords": "今日时间记录"
+    },
+    "settings": {
+      "title": "设置",
+      "personalInfo": "个人信息",
+      "username": "用户名",
+      "email": "邮箱地址",
+      "changePassword": "更改密码",
+      "notifications": "通知设置",
+      "emailNotifications": "电子邮件通知",
+      "inAppNotifications": "应用内通知",
+      "pushNotifications": "推送通知",
+      "themeSettings": "主题设置",
+      "darkMode": "深色模式",
+      "lightMode": "浅色模式",
+      "systemMode": "跟随系统",
+      "languageSettings": "语言设置",
+      "chinese": "中文",
+      "english": "英文",
+      "saveChanges": "保存更改"
+    },
+    "navigation": {
+      "home": "主页",
+      "calendar": "日程",
+      "statistics": "统计",
+      "team": "团队",
+      "settings": "设置"
+    }
+  }

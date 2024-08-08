@@ -1,3 +1,4 @@
+// src/context/DailyContext.tsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import dayjs from 'dayjs';
 
@@ -17,6 +18,7 @@ interface DailyContextType {
   setEntries: React.Dispatch<React.SetStateAction<DailyEntry[]>>;
   selectedNodes: string[];
   setSelectedNodes: React.Dispatch<React.SetStateAction<string[]>>;
+  getBacklinks: (date: string) => DailyEntry[];
 }
 
 const DailyContext = createContext<DailyContextType | undefined>(undefined);
@@ -39,8 +41,15 @@ export const DailyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem('dailyEntries', JSON.stringify(entries));
   }, [entries]);
 
+  const getBacklinks = (date: string): DailyEntry[] => {
+    return entries.filter(entry => 
+      entry.date !== date && 
+      entry.nodes.some(node => node.content.includes(`[[${date}]]`))
+    );
+  };
+
   return (
-    <DailyContext.Provider value={{ entries, setEntries, selectedNodes, setSelectedNodes }}>
+    <DailyContext.Provider value={{ entries, setEntries, selectedNodes, setSelectedNodes, getBacklinks }}>
       {children}
     </DailyContext.Provider>
   );

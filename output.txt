@@ -14,18 +14,21 @@
 │   ├── assets
 │   │   └── react.svg
 │   ├── components
+│   │   ├── BacklinksList.tsx
 │   │   ├── Calendar.tsx
 │   │   ├── common
 │   │   │   └── Button.tsx
+│   │   ├── Dashboard.tsx
+│   │   ├── ErrorBoundary.tsx
 │   │   ├── habit
 │   │   │   ├── HabitForm.tsx
 │   │   │   └── HabitTracker.tsx
 │   │   ├── layout
-│   │   │   ├── Layout.tsx
-│   │   │   ├── Navbar.tsx
-│   │   │   └── Sidebar.tsx
+│   │   │   └── Layout.tsx
+│   │   ├── Layout.tsx
 │   │   ├── PomodoroStats.tsx
 │   │   ├── PomodoroTimer.tsx
+│   │   ├── SlashCommandMenu.tsx
 │   │   ├── task
 │   │   │   ├── DateRangePicker.tsx
 │   │   │   ├── TaskForm.tsx
@@ -37,17 +40,23 @@
 │   │   └── TimeStatistics.tsx
 │   ├── context
 │   │   ├── DailyContext.tsx
-│   │   └── TaskContext.tsx
+│   │   ├── LanguageContext.tsx
+│   │   ├── TaskContext.tsx
+│   │   └── ThemeContext.tsx
 │   ├── hooks
 │   │   └── useTask.ts
 │   ├── index.css
 │   ├── index.tsx
+│   ├── locales
+│   │   ├── en.json
+│   │   └── zh.json
 │   ├── main.tsx
 │   ├── pages
 │   │   ├── CalendarView.tsx
 │   │   ├── Daily.tsx
 │   │   ├── Dashboard.tsx
 │   │   ├── HabitManagement.tsx
+│   │   ├── Settings.tsx
 │   │   ├── TaskManagement.tsx
 │   │   ├── TimeBlockManagement.tsx
 │   │   └── TimeTracking.tsx
@@ -112,11 +121,15 @@
     "@types/react-big-calendar": "^1.8.9",
     "date-fns": "^2.29.3",
     "dayjs": "^1.11.12",
+    "i18next": "^23.12.2",
     "moment": "^2.30.1",
     "react": "^18.2.0",
     "react-big-calendar": "^1.13.1",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.4.0",
+    "react-i18next": "^15.0.1",
+    "react-router-dom": "^6.26.0",
+    "react-selectable-fast": "^3.4.0",
+    "react-transition-group": "^4.4.5",
     "recharts": "^2.1.0"
   },
   "devDependencies": {
@@ -293,76 +306,38 @@ export default defineConfig({
 
 
 ----- src\App.tsx -----
-// src/App.tsx
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { Routes, Route } from 'react-router-dom';
+import { CssBaseline } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import Layout from './components/layout/Layout';
+import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
-import TaskManagement from './pages/TaskManagement';
-import CalendarView from './pages/CalendarView';
-import TimeTracking from './pages/TimeTracking';
-import HabitManagement from './pages/HabitManagement';
-import TimeBlockManagement from './pages/TimeBlockManagement';
-import Daily from './pages/Daily';
+import Settings from './pages/Settings';
 import { TaskProvider } from './context/TaskContext';
 import { DailyProvider } from './context/DailyContext';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#6750A4',
-    },
-    secondary: {
-      main: '#958DA5',
-    },
-    background: {
-      default: '#FFFBFE',
-    },
-  },
-  typography: {
-    fontFamily: 'Roboto, Arial, sans-serif',
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-        },
-      },
-    },
-  },
-});
-
-// 移除多余的 });
-// }); 
+import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <TaskProvider>
-          <DailyProvider>
-            <Router>
+    <ThemeProvider>
+      <LanguageProvider>
+        <CssBaseline />
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <TaskProvider>
+            <DailyProvider>
               <Layout>
                 <Routes>
-                  <Route path="/" element={<Navigate to="/daily" replace />} />
-                  <Route path="/daily" element={<Daily />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/tasks" element={<TaskManagement />} />
-                  <Route path="/calendar" element={<CalendarView />} />
-                  <Route path="/time-tracking" element={<TimeTracking />} />
-                  <Route path="/habits" element={<HabitManagement />} />
-                  <Route path="/time-blocks" element={<TimeBlockManagement />} />
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/settings" element={<Settings />} />
+                  {/* Add other routes as needed */}
                 </Routes>
               </Layout>
-            </Router>
-          </DailyProvider>
-        </TaskProvider>
-      </LocalizationProvider>
+            </DailyProvider>
+          </TaskProvider>
+        </LocalizationProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 };
@@ -438,7 +413,39 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+/* 添加到你的全局样式文件中 */
+.sidebar-enter {
+  width: 60px;
+  opacity: 0;
+}
+.sidebar-enter-active {
+  width: 240px;
+  opacity: 1;
+  transition: all 300ms ease-in;
+}
+.sidebar-exit {
+  width: 240px;
+  opacity: 1;
+}
+.sidebar-exit-active {
+  width: 60px;
+  opacity: 0;
+  transition: all 300ms ease-in;
+}
 
+/* 右侧边栏的动画 */
+.sidebar-enter.right-sidebar {
+  width: 0;
+}
+.sidebar-enter-active.right-sidebar {
+  width: 220px;
+}
+.sidebar-exit.right-sidebar {
+  width: 220px;
+}
+.sidebar-exit-active.right-sidebar {
+  width: 0;
+}
 
 ----- src\index.tsx -----
 import React from 'react';
@@ -461,17 +468,19 @@ root.render(
 );
 
 ----- src\main.tsx -----
-// src/main.tsx
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import './index.css';
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import App from './App.tsx'
+import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>,
-);
+)
 
 ----- src\vite-env.d.ts -----
 /// <reference types="vite/client" />
@@ -479,6 +488,40 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 ----- src\assets\react.svg -----
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
+
+----- src\components\BacklinksList.tsx -----
+import React from 'react';
+import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { DailyEntry } from '../context/DailyContext';
+
+interface BacklinksListProps {
+  backlinks: DailyEntry[];
+}
+
+const BacklinksList: React.FC<BacklinksListProps> = ({ backlinks }) => {
+  if (backlinks.length === 0) return null;
+
+  return (
+    <Box sx={{ mt: 4, borderTop: '1px solid #e0e0e0', pt: 2 }}>
+      <Typography variant="h6" gutterBottom>
+        Linked References
+      </Typography>
+      <List>
+        {backlinks.map((entry) => (
+          <ListItem key={entry.date} component={Link} to={`/daily/${entry.date}`} sx={{ color: 'primary.main', textDecoration: 'none' }}>
+            <ListItemText
+              primary={entry.date}
+              secondary={entry.nodes.find(node => node.content.includes(`[[${entry.date}]]`))?.content}
+            />
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
+};
+
+export default BacklinksList;
 
 ----- src\components\Calendar.tsx -----
 import React, { useState } from 'react';
@@ -549,6 +592,349 @@ const Calendar: React.FC = () => {
 };
 
 export default Calendar;
+
+----- src\components\Dashboard.tsx -----
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Box, Typography, IconButton, Button } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+
+const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
+
+  const tasks = [
+    { time: '09:00', task: '团队晨会' },
+    { time: '11:00', task: '客户演示' },
+    { time: '14:00', task: '代码审查' },
+    { time: '16:00', task: '项目规划会议' },
+    { time: '18:00', task: '日报总结' },
+  ];
+
+  const timeRecords = [
+    { time: '09:00-10:30', activity: '会议' },
+    { time: '11:00-13:30', activity: '编程' },
+    { time: '14:00-16:00', activity: '设计' },
+    { time: '16:00-17:30', activity: '文档' },
+  ];
+
+  const views = ['时间轴视图', '时间段视图', '日视图', '周视图', '月视图'];
+  const filters = ['全部任务', '优先级高', '今日截止', '未完成', '已完成'];
+
+  return (
+    <Box sx={{ display: 'flex', height: '100%', position: 'relative' }}>
+      <Box sx={{ flex: 1, mr: rightSidebarOpen ? '220px' : 0, transition: 'margin-right 0.3s' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Typography variant="h4">{t('dashboard.greeting', { username: '用户名' })}</Typography>
+          <IconButton 
+            sx={{ bgcolor: '#6750A4', color: 'white' }}
+            onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+          >
+            {rightSidebarOpen ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </IconButton>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          {/* Left Timeline */}
+          <Box sx={{ width: '48%' }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>{t('dashboard.todayTasks')}</Typography>
+            <Box sx={{ bgcolor: '#E8DEF8', p: 2, mb: 3, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography>{t('dashboard.allDayTasks')}</Typography>
+              <ExpandMoreIcon />
+            </Box>
+            <Box sx={{ position: 'relative', pl: 4 }}>
+              <Box sx={{ position: 'absolute', left: 8, top: 0, bottom: 50, width: 2, bgcolor: '#6750A4' }} />
+              {tasks.map((task, index) => (
+                <Box key={index} sx={{ mb: 4, display: 'flex', alignItems: 'center' }}>
+                  <Box sx={{ 
+                    width: 16, 
+                    height: 16, 
+                    borderRadius: '50%', 
+                    bgcolor: '#6750A4', 
+                    position: 'absolute',
+                    left: 2,
+                    marginTop: '3px'
+                  }} />
+                  <Typography sx={{ ml: 3 }}>{task.time} {task.task}</Typography>
+                </Box>
+              ))}
+              <IconButton 
+                sx={{ 
+                  position: 'absolute', 
+                  left: -4, 
+                  bottom: 0, 
+                  bgcolor: '#6750A4', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#5c4593' }
+                }}
+              >
+                <AddIcon />
+              </IconButton>
+            </Box>
+          </Box>
+
+          {/* Right Timeline */}
+          <Box sx={{ width: '48%' }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>{t('dashboard.timeRecords')}</Typography>
+            <Box sx={{ position: 'relative', pl: 4 }}>
+              <Box sx={{ position: 'absolute', left: 8, top: 0, bottom: 50, width: 2, bgcolor: '#03DAC6' }} />
+              {timeRecords.map((record, index) => (
+                <Box key={index} sx={{ mb: 4, position: 'relative' }}>
+                  <Box sx={{ 
+                    width: 16, 
+                    height: 16, 
+                    borderRadius: '50%', 
+                    bgcolor: '#03DAC6', 
+                    position: 'absolute',
+                    left: 2,
+                    top: 12,
+                    zIndex: 1
+                  }} />
+                  <Box sx={{ 
+                    ml: 3,
+                    height: 40, 
+                    width: 'calc(100% - 24px)', 
+                    bgcolor: 'rgba(3, 218, 198, 0.2)',
+                    borderRadius: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    pl: 2
+                  }}>
+                    <Typography>{record.time} {record.activity}</Typography>
+                  </Box>
+                </Box>
+              ))}
+              <IconButton 
+                sx={{ 
+                  position: 'absolute', 
+                  left: -4, 
+                  bottom: 0, 
+                  bgcolor: '#03DAC6', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#02b9a5' }
+                }}
+              >
+                <AddIcon />
+              </IconButton>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Right Sidebar */}
+      <Box sx={{ 
+        position: 'absolute',
+        right: 0,
+        top: 0,
+        bottom: 0,
+        width: rightSidebarOpen ? 220 : 0,
+        bgcolor: 'white', 
+        py: 2, 
+        px: rightSidebarOpen ? 1 : 0, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        borderLeft: '1px solid #e0e0e0',
+        transition: 'width 0.3s, padding 0.3s',
+        overflow: 'hidden'
+      }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>切换视图</Typography>
+        {views.map((view, index) => (
+          <Button
+            key={index}
+            variant={index === 0 ? "contained" : "outlined"}
+            sx={{
+              mb: 1,
+              bgcolor: index === 0 ? '#E8DEF8' : 'white',
+              color: '#1C1B1F',
+              border: index === 0 ? 'none' : '1px solid #CAC4D0',
+              borderRadius: '20px',
+              '&:hover': { bgcolor: index === 0 ? '#E8DEF8' : 'white' },
+            }}
+          >
+            {view}
+          </Button>
+        ))}
+        <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>切换筛选</Typography>
+        {filters.map((filter, index) => (
+          <Button
+            key={index}
+            variant={index === 0 ? "contained" : "outlined"}
+            sx={{
+              mb: 1,
+              bgcolor: index === 0 ? '#E8DEF8' : 'white',
+              color: '#1C1B1F',
+              border: index === 0 ? 'none' : '1px solid #CAC4D0',
+              borderRadius: '20px',
+              '&:hover': { bgcolor: index === 0 ? '#E8DEF8' : 'white' },
+            }}
+          >
+            {filter}
+          </Button>
+        ))}
+      </Box>
+    </Box>
+  );
+};
+
+export default Dashboard;
+
+----- src\components\ErrorBoundary.tsx -----
+import React, { ErrorInfo, ReactNode } from 'react';
+
+interface Props {
+  children: ReactNode;
+}
+
+interface State {
+  hasError: boolean;
+  error: Error | null;
+  errorInfo: ErrorInfo | null;
+}
+
+class ErrorBoundary extends React.Component<Props, State> {
+  public state: State = {
+    hasError: false,
+    error: null,
+    errorInfo: null
+  };
+
+  public static getDerivedStateFromError(_: Error): State {
+    return { hasError: true, error: null, errorInfo: null };
+  }
+
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
+    this.setState({ error, errorInfo });
+  }
+
+  public render() {
+    if (this.state.hasError) {
+      return (
+        <div>
+          <h1>Something went wrong.</h1>
+          <details style={{ whiteSpace: 'pre-wrap' }}>
+            {this.state.error && this.state.error.toString()}
+            <br />
+            {this.state.errorInfo && this.state.errorInfo.componentStack}
+          </details>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+export default ErrorBoundary;
+
+----- src\components\Layout.tsx -----
+// src\components\Layout.tsx
+import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Box, IconButton, List, ListItem, Typography, Drawer, Button } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import AddIcon from '@mui/icons-material/Add';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import InsightsIcon from '@mui/icons-material/Insights';
+import SettingsIcon from '@mui/icons-material/Settings';
+import HomeIcon from '@mui/icons-material/Home'; // 引入 HomeIcon
+
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { t } = useTranslation();
+
+  const projects = [
+    { icon: '🚀', name: '网站重设计' },
+    { icon: '📊', name: '数据分析报告' },
+    { icon: '📱', name: '移动应用开发' },
+    { icon: '🛠️', name: '系统维护' },
+    { icon: '📚', name: '文档编写' }
+  ];
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  return (
+    <Box sx={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+      <Drawer
+        variant="permanent"
+        open={sidebarOpen}
+        sx={{
+          width: sidebarOpen ? 240 : 60,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: sidebarOpen ? 240 : 60,
+            boxSizing: 'border-box',
+            transition: 'width 0.3s',
+            overflowX: 'hidden',
+            bgcolor: 'white',
+          },
+        }}
+      >
+        <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <IconButton onClick={toggleSidebar} sx={{ alignSelf: 'flex-start', mb: 2, bgcolor: '#6750A4', color: 'white' }}>
+            <MenuIcon />
+          </IconButton>
+
+          {/* 添加 Home 按钮 */}
+          <Button 
+            onClick={() => navigate('/')} // 点击跳转到首页
+            sx={{ color: '#49454F', justifyContent: 'flex-start', width: '100%', mb: 2 }}
+          >
+            {sidebarOpen ? <><HomeIcon sx={{ mr: 1 }} /> {t('navigation.home')}</> : <HomeIcon />} 
+          </Button>
+
+          {sidebarOpen && <Typography variant="h6" sx={{ mb: 2 }}>Projects</Typography>}
+          <List>
+            {sidebarOpen && projects.map((project, index) => (
+              <ListItem key={index} sx={{ py: 0.5 }}>
+                <Typography variant="body2" sx={{ color: '#49454F' }}>
+                  {project.icon} {project.name}
+                </Typography>
+              </ListItem>
+            ))}
+            {sidebarOpen && (
+              <ListItem>
+                <Button startIcon={<AddIcon />} sx={{ color: '#6750A4', justifyContent: 'flex-start', px: 0 }}>
+                  添加项目
+                </Button>
+              </ListItem>
+            )}
+          </List>
+          <Box sx={{ mt: 'auto' }}>
+            <Button sx={{ color: '#49454F', justifyContent: 'flex-start', width: '100%' }}>
+              {sidebarOpen ? <><BarChartIcon sx={{ mr: 1 }} /> 数据统计</> : <BarChartIcon />}
+            </Button>
+            <Button sx={{ color: '#49454F', justifyContent: 'flex-start', width: '100%' }}>
+              {sidebarOpen ? <><InsightsIcon sx={{ mr: 1 }} /> 数据分析</> : <InsightsIcon />}
+            </Button>
+            {/* 修改 Settings 按钮，点击跳转到 /settings */}
+            <Button 
+              onClick={() => navigate('/settings')} 
+              sx={{ color: '#49454F', justifyContent: 'flex-start', width: '100%' }}
+            >
+              {sidebarOpen ? <><SettingsIcon sx={{ mr: 1 }} /> {t('navigation.settings')}</> : <SettingsIcon />} 
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, bgcolor: '#F7F2FA', overflow: 'auto' }}>
+        {children}
+      </Box>
+    </Box>
+  );
+};
+
+export default Layout;
 
 ----- src\components\PomodoroStats.tsx -----
 import React from 'react';
@@ -745,6 +1131,184 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ onTimerComplete, tasks })
 };
 
 export default PomodoroTimer;
+
+----- src\components\SlashCommandMenu.tsx -----
+import React, { useState, useEffect, useMemo } from 'react';
+import { Box, List, ListItem, ListItemText, ListItemIcon, Popover } from '@mui/material';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+
+export interface SlashCommand {
+  name: string;
+  execute?: (arg?: any) => void;
+  subCommands?: SlashCommand[];
+}
+
+interface SlashCommandMenuProps {
+  commands: SlashCommand[];
+  isOpen: boolean;
+  position: { top: number; left: number };
+  selectedIndex: number;
+  onSelect: (command: SlashCommand, arg?: any) => void;
+  searchTerm: string;
+  onClose: () => void;  // 新增：关闭菜单的回调
+}
+
+// 递归搜索函数
+const searchCommands = (commands: SlashCommand[], term: string): SlashCommand[] => {
+  return commands.reduce((acc: SlashCommand[], command) => {
+    if (command.name.toLowerCase().includes(term.toLowerCase())) {
+      acc.push(command);
+    }
+    if (command.subCommands) {
+      const matchingSubCommands = searchCommands(command.subCommands, term);
+      if (matchingSubCommands.length > 0) {
+        acc.push({
+          ...command,
+          subCommands: matchingSubCommands
+        });
+      }
+    }
+    return acc;
+  }, []);
+};
+
+const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
+  commands,
+  isOpen,
+  position,
+  selectedIndex,
+  onSelect,
+  searchTerm,
+  onClose
+}) => {
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [commandStack, setCommandStack] = useState<SlashCommand[][]>([commands]);
+
+  const filteredCommands = useMemo(() => {
+    return searchTerm ? searchCommands(commands, searchTerm) : commands;
+  }, [commands, searchTerm]);
+
+  useEffect(() => {
+    if (searchTerm) {
+      setCommandStack([filteredCommands]);
+    } else {
+      setCommandStack([commands]);
+    }
+  }, [searchTerm, filteredCommands, commands]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setCommandStack([commands]);
+    }
+  }, [isOpen, commands]);
+
+  useEffect(() => {
+    if (filteredCommands.length === 0 && isOpen) {
+      onClose();
+    }
+  }, [filteredCommands, isOpen, onClose]);
+
+  const currentCommands = commandStack[commandStack.length - 1];
+
+  const handleDateCommand = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+    setDatePickerOpen(true);
+  };
+
+  const handleDateSelect = (date: dayjs.Dayjs | null) => {
+    if (date) {
+      const dateString = date.format('YYYY-MM-DD');
+      onSelect(commands.find(cmd => cmd.name === 'Date')!, `[[${dateString}]]`);
+    }
+    setDatePickerOpen(false);
+  };
+
+  const handleCommandSelect = (command: SlashCommand) => {
+    if (command.subCommands && command.subCommands.length > 0) {
+      setCommandStack(prev => [...prev, command.subCommands]);
+    } else if (command.name === 'Date') {
+      handleDateCommand({ currentTarget: anchorEl } as React.MouseEvent<HTMLElement>);
+    } else if (command.execute) {
+      command.execute();
+      onSelect(command);
+    } else {
+      onSelect(command);
+    }
+  };
+
+  const handleBack = () => {
+    if (commandStack.length > 1) {
+      setCommandStack(prev => prev.slice(0, -1));
+    }
+  };
+
+  if (!isOpen || currentCommands.length === 0) return null;
+
+  return (
+    <Box
+      sx={{
+        position: 'absolute',
+        top: position.top,
+        left: position.left,
+        bgcolor: 'background.paper',
+        boxShadow: 3,
+        p: 1,
+        zIndex: 1300,
+        minWidth: 200,
+      }}
+    >
+      <List>
+        {commandStack.length > 1 && !searchTerm && (
+          <ListItem button onClick={handleBack}>
+            <ListItemIcon>
+              <ArrowBackIcon />
+            </ListItemIcon>
+            <ListItemText primary="Back" />
+          </ListItem>
+        )}
+        {currentCommands.map((command, index) => (
+          <ListItem 
+            button 
+            key={command.name} 
+            selected={index === selectedIndex}
+            onClick={() => handleCommandSelect(command)}
+          >
+            <ListItemText primary={command.name} />
+            {command.subCommands && command.subCommands.length > 0 && !searchTerm && (
+              <ListItemIcon>
+                <ArrowRightIcon />
+              </ListItemIcon>
+            )}
+          </ListItem>
+        ))}
+      </List>
+      <Popover
+        open={datePickerOpen}
+        anchorEl={anchorEl}
+        onClose={() => setDatePickerOpen(false)}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+      >
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            onChange={handleDateSelect}
+            renderInput={(params) => <div {...params} />}
+          />
+        </LocalizationProvider>
+      </Popover>
+    </Box>
+  );
+};
+
+export default SlashCommandMenu;
 
 ----- src\components\TimeEntryForm.tsx -----
 import React, { useState } from 'react';
@@ -1119,170 +1683,22 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, habitLogs, onToggle
 export default HabitTracker;
 
 ----- src\components\layout\Layout.tsx -----
-import React, { useState } from 'react';
-import { Box, Drawer, AppBar, Toolbar, IconButton, Typography } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import Sidebar from './Sidebar';
+import React from 'react';
+import { Box } from '@mui/material';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
-const drawerWidth = 240;
-
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
   return (
-    <Box sx={{ display: 'flex' }}>
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Planner OS
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="mailbox folders"
-      >
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
-          sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-        >
-          <Sidebar />
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-          open
-        >
-          <Sidebar />
-        </Drawer>
-      </Box>
-      <Box
-        component="main"
-        sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
-      >
-        <Toolbar />
-        {children}
-      </Box>
+    <Box sx={{ display: 'flex', height: '100vh' }}>
+      {children}
     </Box>
   );
 };
 
 export default Layout;
-
------ src\components\layout\Navbar.tsx -----
-import React from 'react';
-import { Link } from 'react-router-dom';
-
-const Navbar: React.FC = () => {
-  return (
-    <nav className="bg-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="text-2xl font-bold text-gray-800">Planner OS</Link>
-            </div>
-          </div>
-          <div className="flex items-center">
-            <button className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              <span className="sr-only">View notifications</span>
-              <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-            </button>
-            <div className="ml-3 relative">
-              <div>
-                <button className="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="user-menu" aria-haspopup="true">
-                  <span className="sr-only">Open user menu</span>
-                  <img className="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-};
-
-export default Navbar;
-
------ src\components\layout\Sidebar.tsx -----
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { List, ListItem, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import TimerIcon from '@mui/icons-material/Timer';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import ViewWeekIcon from '@mui/icons-material/ViewWeek';
-import TodayIcon from '@mui/icons-material/Today';
-
-const navItems = [
-  { name: 'Daily', path: '/daily', icon: <TodayIcon /> },
-  { name: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
-  { name: 'Tasks', path: '/tasks', icon: <AssignmentIcon /> },
-  { name: 'Calendar', path: '/calendar', icon: <CalendarTodayIcon /> },
-  { name: 'Time Tracking', path: '/time-tracking', icon: <TimerIcon /> },
-  { name: 'Habits', path: '/habits', icon: <EmojiEventsIcon /> },
-  { name: 'Time Blocks', path: '/time-blocks', icon: <ViewWeekIcon /> },
-];
-
-const Sidebar: React.FC = () => {
-  const location = useLocation();
-
-  return (
-    <div>
-      <Toolbar />
-      <List>
-        {navItems.map((item) => (
-          <ListItem
-            button
-            key={item.name}
-            component={Link}
-            to={item.path}
-            selected={location.pathname === item.path}
-          >
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.name} />
-          </ListItem>
-        ))}
-      </List>
-    </div>
-  );
-};
-
-export default Sidebar;
 
 ----- src\components\task\DateRangePicker.tsx -----
 import React from 'react';
@@ -1886,6 +2302,7 @@ const TimeBlockList: React.FC<TimeBlockListProps> = ({ timeBlocks, onEditTimeBlo
 export default TimeBlockList;
 
 ----- src\context\DailyContext.tsx -----
+// src/context/DailyContext.tsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import dayjs from 'dayjs';
 
@@ -1905,6 +2322,7 @@ interface DailyContextType {
   setEntries: React.Dispatch<React.SetStateAction<DailyEntry[]>>;
   selectedNodes: string[];
   setSelectedNodes: React.Dispatch<React.SetStateAction<string[]>>;
+  getBacklinks: (date: string) => DailyEntry[];
 }
 
 const DailyContext = createContext<DailyContextType | undefined>(undefined);
@@ -1927,8 +2345,15 @@ export const DailyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem('dailyEntries', JSON.stringify(entries));
   }, [entries]);
 
+  const getBacklinks = (date: string): DailyEntry[] => {
+    return entries.filter(entry => 
+      entry.date !== date && 
+      entry.nodes.some(node => node.content.includes(`[[${date}]]`))
+    );
+  };
+
   return (
-    <DailyContext.Provider value={{ entries, setEntries, selectedNodes, setSelectedNodes }}>
+    <DailyContext.Provider value={{ entries, setEntries, selectedNodes, setSelectedNodes, getBacklinks }}>
       {children}
     </DailyContext.Provider>
   );
@@ -1938,69 +2363,291 @@ export const useDaily = () => {
   const context = useContext(DailyContext);
   if (context === undefined) {
     throw new Error('useDaily must be used within a DailyProvider');
+  }
+  return context;
+};
+
+----- src\context\LanguageContext.tsx -----
+import React, { createContext, useState, useContext } from 'react';
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import enTranslations from '../locales/en.json';
+import zhTranslations from '../locales/zh.json';
+
+i18n
+  .use(initReactI18next)
+  .init({
+    resources: {
+      en: { translation: enTranslations },
+      zh: { translation: zhTranslations },
+    },
+    lng: 'zh', // 默认语言
+    fallbackLng: 'en',
+    interpolation: {
+      escapeValue: false,
+    },
+  });
+
+interface LanguageContextType {
+  language: string;
+  setLanguage: (lang: string) => void;
+}
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [language, setLanguage] = useState('zh');
+
+  const changeLanguage = (lang: string) => {
+    setLanguage(lang);
+    i18n.changeLanguage(lang);
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage: changeLanguage }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;
 };
 
 ----- src\context\TaskContext.tsx -----
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import dayjs from 'dayjs';
+import { Task } from '../types/task';
 
-interface Node {
-  id: string;
-  content: string;
-  level: number;
+interface TaskContextType {
+  tasks: Task[];
+  addTask: (task: Omit<Task, 'id'>) => void;
+  updateTask: (task: Task) => void;
+  deleteTask: (id: string) => void;
 }
 
-interface DailyEntry {
-  date: string;
-  nodes: Node[];
-}
+const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
-interface DailyContextType {
-  entries: DailyEntry[];
-  setEntries: React.Dispatch<React.SetStateAction<DailyEntry[]>>;
-  selectedNodes: string[];
-  setSelectedNodes: React.Dispatch<React.SetStateAction<string[]>>;
-}
-
-const DailyContext = createContext<DailyContextType | undefined>(undefined);
-
-export const DailyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [entries, setEntries] = useState<DailyEntry[]>([]);
-  const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
+export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
-    const storedEntries = localStorage.getItem('dailyEntries');
-    if (storedEntries) {
-      setEntries(JSON.parse(storedEntries));
-    } else {
-      const today = dayjs().format('YYYY-MM-DD');
-      setEntries([{ date: today, nodes: [{ id: '1', content: '', level: 0 }] }]);
+    const storedTasks = localStorage.getItem('tasks');
+    if (storedTasks) {
+      setTasks(JSON.parse(storedTasks));
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('dailyEntries', JSON.stringify(entries));
-  }, [entries]);
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  const addTask = (task: Omit<Task, 'id'>) => {
+    const newTask: Task = { ...task, id: Date.now().toString() };
+    setTasks([...tasks, newTask]);
+  };
+
+  const updateTask = (updatedTask: Task) => {
+    setTasks(tasks.map(task => task.id === updatedTask.id ? updatedTask : task));
+  };
+
+  const deleteTask = (id: string) => {
+    setTasks(tasks.filter(task => task.id !== id));
+  };
 
   return (
-    <DailyContext.Provider value={{ entries, setEntries, selectedNodes, setSelectedNodes }}>
+    <TaskContext.Provider value={{ tasks, addTask, updateTask, deleteTask }}>
       {children}
-    </DailyContext.Provider>
+    </TaskContext.Provider>
   );
 };
 
-export const useDaily = () => {
-  const context = useContext(DailyContext);
+export const useTaskContext = () => {
+  const context = useContext(TaskContext);
   if (context === undefined) {
-    throw new Error('useDaily must be used within a DailyProvider');
+    throw new Error('useTaskContext must be used within a TaskProvider');
+  }
+  return context;
+};
+
+----- src\context\ThemeContext.tsx -----
+// src\context\ThemeContext.tsx
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { 
+  ThemeProvider as MuiThemeProvider, 
+  createTheme, 
+  PaletteMode,
+  PaletteOptions 
+} from '@mui/material';
+
+type ThemeContextType = {
+  mode: 'light' | 'dark' | 'system';
+  setMode: (mode: 'light' | 'dark' | 'system') => void;
+};
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [mode, setMode] = useState<'light' | 'dark' | 'system'>(() => {
+    const savedMode = localStorage.getItem('themeMode');
+    return (savedMode as 'light' | 'dark' | 'system') || 'system';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('themeMode', mode);
+  }, [mode]);
+
+  const getActualMode = (): PaletteMode => {
+    if (mode === 'system') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return mode;
+  };
+
+  const getDesignTokens = (mode: PaletteMode): PaletteOptions => ({
+    mode,
+    ...(mode === 'light'
+      ? {
+          // palette values for light mode
+          primary: {
+            main: '#6750A4',
+          },
+          secondary: {
+            main: '#625B71',
+          },
+          background: {
+            default: '#FFFFFF',
+            paper: '#FFFFFF',
+          },
+        }
+      : {
+          // palette values for dark mode
+          primary: {
+            main: '#D0BCFF',
+          },
+          secondary: {
+            main: '#CCC2DC',
+          },
+          background: {
+            default: '#1C1B1F',
+            paper: '#1C1B1F',
+          },
+          text: {
+            primary: '#FFFFFF',
+          }
+        }),
+  });
+
+  const theme = React.useMemo(
+    () =>
+      createTheme({
+        palette: getDesignTokens(getActualMode()),
+        typography: {
+          fontFamily: 'Roboto, sans-serif',
+        },
+      }),
+    [mode]
+  );
+
+  // Apply global background color
+  const globalBackgroundColor = getActualMode() === 'dark' ? '#121212' : '#FFFFFF';
+
+  return (
+    <ThemeContext.Provider value={{ mode, setMode }}>
+      <MuiThemeProvider theme={theme}>
+        <div style={{ backgroundColor: globalBackgroundColor, minHeight: '100vh' }}> {/* Apply background color to a div wrapping the app */}
+          {children}
+        </div>
+      </MuiThemeProvider>
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;
 };
 
 ----- src\hooks\useTask.ts -----
 
+
+----- src\locales\en.json -----
+{
+    "dashboard": {
+      "greeting": "Good morning, {{username}}",
+      "todayTasks": "Today's Tasks",
+      "allDayTasks": "All Day Tasks",
+      "timeRecords": "Today's Time Records"
+    },
+    "settings": {
+      "title": "Settings",
+      "personalInfo": "Personal Information",
+      "username": "Username",
+      "email": "Email Address",
+      "changePassword": "Change Password",
+      "notifications": "Notification Settings",
+      "emailNotifications": "Email Notifications",
+      "inAppNotifications": "In-App Notifications",
+      "pushNotifications": "Push Notifications",
+      "themeSettings": "Theme Settings",
+      "darkMode": "Dark Mode",
+      "lightMode": "Light Mode",
+      "systemMode": "Follow System",
+      "languageSettings": "Language Settings",
+      "chinese": "Chinese",
+      "english": "English",
+      "saveChanges": "Save Changes"
+    },
+    "navigation": {
+      "home": "Home",
+      "calendar": "Calendar",
+      "statistics": "Statistics",
+      "team": "Team",
+      "settings": "Settings"
+    }
+  }
+
+----- src\locales\zh.json -----
+{
+    "dashboard": {
+      "greeting": "早上好，{{username}}",
+      "todayTasks": "今日待办事项",
+      "allDayTasks": "全天任务",
+      "timeRecords": "今日时间记录"
+    },
+    "settings": {
+      "title": "设置",
+      "personalInfo": "个人信息",
+      "username": "用户名",
+      "email": "邮箱地址",
+      "changePassword": "更改密码",
+      "notifications": "通知设置",
+      "emailNotifications": "电子邮件通知",
+      "inAppNotifications": "应用内通知",
+      "pushNotifications": "推送通知",
+      "themeSettings": "主题设置",
+      "darkMode": "深色模式",
+      "lightMode": "浅色模式",
+      "systemMode": "跟随系统",
+      "languageSettings": "语言设置",
+      "chinese": "中文",
+      "english": "英文",
+      "saveChanges": "保存更改"
+    },
+    "navigation": {
+      "home": "主页",
+      "calendar": "日程",
+      "statistics": "统计",
+      "team": "团队",
+      "settings": "设置"
+    }
+  }
 
 ----- src\pages\CalendarView.tsx -----
 import React from 'react';
@@ -2075,58 +2722,153 @@ const CalendarView: React.FC = () => {
 export default CalendarView;
 
 ----- src\pages\Daily.tsx -----
-import React, { useRef, KeyboardEvent, useEffect } from 'react';
-import { Box, Typography, TextField, IconButton } from '@mui/material';
+// src\pages\Daily.tsx
+import React, { useRef, KeyboardEvent, useEffect, useState } from 'react';
+import { Box, Typography, TextField, IconButton, Drawer } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import dayjs, { Dayjs } from 'dayjs';
-import { useDaily } from '../context/DailyContext';
+import { useDaily, DailyEntry, Node } from '../context/DailyContext';
+import { useTaskContext } from '../context/TaskContext';
+import TaskList from '../components/task/TaskList';
+import ErrorBoundary from '../components/ErrorBoundary';
+import SlashCommandMenu, { SlashCommand } from '../components/SlashCommandMenu';
+import BacklinksList from '../components/BacklinksList';
+
+const SLASH_COMMANDS: SlashCommand[] = [
+  {
+    name: 'Date',
+    subCommands: [
+      {
+        name: 'Insert Date',
+        execute: () => {
+          // 这里实际上不需要执行anything，因为日期选择会在 SlashCommandMenu 中处理
+        }
+      },
+      {
+        name: 'Start time',
+        execute: () => {
+          console.log('Inserting start time...');
+          // 实现插入开始时间的逻辑
+        }
+      },
+      {
+        name: 'End time',
+        execute: () => {
+          console.log('Inserting end time...');
+          // 实现插入结束时间的逻辑
+        }
+      }
+    ]
+  },
+  {
+    name: 'Time record',
+    execute: () => {
+      console.log('Starting time record...');
+      // 实现时间记录的逻辑
+    }
+  },
+  {
+    name: 'Pomodoro',
+    execute: () => {
+      console.log('Starting Pomodoro timer...');
+      // 实现番茄钟的逻辑
+    }
+  }
+];
 
 const Daily: React.FC = () => {
-  const { entries, setEntries, selectedNodes, setSelectedNodes } = useDaily();
-  const [selectedDate, setSelectedDate] = React.useState<Dayjs>(dayjs());
+  const { entries, setEntries, selectedNodes, setSelectedNodes, getBacklinks } = useDaily();
+  const [backlinks, setBacklinks] = useState<DailyEntry[]>([]);
+  const { tasks } = useTaskContext();
+  const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
   const contentRefs = useRef<{ [key: string]: HTMLTextAreaElement | null }>({});
   const todayRef = useRef<HTMLDivElement>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [slashMenuOpen, setSlashMenuOpen] = useState(false);
+  const [slashMenuPosition, setSlashMenuPosition] = useState({ top: 0, left: 0 });
+  const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
+  const [selectedCommand, setSelectedCommand] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [commandStack, setCommandStack] = useState<SlashCommand[][]>([SLASH_COMMANDS]);
 
   useEffect(() => {
-    // Scroll to today's entry
     const today = dayjs().format('YYYY-MM-DD');
-    const todayEntry = entries.find(entry => entry.date === today);
-    if (todayEntry) {
-      todayRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setSelectedDate(dayjs(today));
+    const todayEntry = entries.find((entry: DailyEntry) => entry.date === today);
+    if (!todayEntry) {
+      setEntries((prevEntries: DailyEntry[]) => [...prevEntries, { date: today, nodes: [{ id: '1', content: '', level: 0 }] }]);
     }
-  }, [entries]);
+    todayRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [entries, setEntries]);
+
+  useEffect(() => {
+    if (selectedDate) {
+      const dateString = selectedDate.format('YYYY-MM-DD');
+      setBacklinks(getBacklinks(dateString));
+    }
+  }, [selectedDate, entries, getBacklinks]);
 
   const handleDateChange = (newDate: Dayjs | null) => {
     if (newDate) {
       setSelectedDate(newDate);
       const dateString = newDate.format('YYYY-MM-DD');
-      if (!entries.some(entry => entry.date === dateString)) {
-        setEntries(prevEntries => [...prevEntries, { date: dateString, nodes: [{ id: '1', content: '', level: 0 }] }]);
+      if (!entries.some((entry: DailyEntry) => entry.date === dateString)) {
+        setEntries((prevEntries: DailyEntry[]) => [...prevEntries, { date: dateString, nodes: [{ id: '1', content: '', level: 0 }] }]);
       }
     }
   };
 
   const handleContentChange = (date: string, nodeId: string, newContent: string) => {
-    setEntries(prevEntries =>
-      prevEntries.map(entry =>
+    setEntries((prevEntries: DailyEntry[]) =>
+      prevEntries.map((entry: DailyEntry) =>
         entry.date === date
           ? {
               ...entry,
-              nodes: entry.nodes.map(node =>
+              nodes: entry.nodes.map((node: Node) =>
                 node.id === nodeId ? { ...node, content: newContent } : node
               )
             }
           : entry
       )
     );
+
+    checkForSlashCommand(date, nodeId, newContent);
+  };
+
+  const checkForSlashCommand = (date: string, nodeId: string, content: string) => {
+    const input = contentRefs.current[`${date}-${nodeId}`];
+    if (input) {
+      const cursorPosition = input.selectionStart;
+      const textBeforeCursor = content.slice(0, cursorPosition);
+      const lastSlashIndex = textBeforeCursor.lastIndexOf('/');
+
+      if (lastSlashIndex === -1 || cursorPosition <= lastSlashIndex) {
+        setSlashMenuOpen(false);
+        setSearchTerm('');
+        setCommandStack([SLASH_COMMANDS]); // Reset command stack
+      } else {
+        const newSearchTerm = textBeforeCursor.slice(lastSlashIndex + 1).toLowerCase();
+        setSearchTerm(newSearchTerm);
+
+        const rect = input.getBoundingClientRect();
+        const lineHeight = parseInt(getComputedStyle(input).lineHeight);
+        const lines = textBeforeCursor.split('\n');
+        const currentLineIndex = lines.length - 1;
+        const top = rect.top + window.scrollY + lineHeight * (currentLineIndex + 1);
+        const left = rect.left + window.scrollX + (lines[currentLineIndex].length * 8); // Approximation for character width
+        setSlashMenuPosition({ top, left });
+        setSlashMenuOpen(true);
+        setSelectedCommand(0);
+      }
+    }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>, date: string, nodeId: string, index: number) => {
-    const entry = entries.find(e => e.date === date);
+    const entry = entries.find((entry: DailyEntry) => entry.date === date);
     if (!entry) return;
 
     const currentNode = entry.nodes[index];
@@ -2136,15 +2878,32 @@ const Daily: React.FC = () => {
     const cursorAtStart = input.selectionStart === 0;
     const cursorAtEnd = input.selectionEnd === currentNode.content.length;
 
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (slashMenuOpen) {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedCommand(prev => (prev > 0 ? prev - 1 : commandStack[commandStack.length - 1].length - 1));
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedCommand(prev => (prev < commandStack[commandStack.length - 1].length - 1 ? prev + 1 : 0));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        handleCommandSelect(commandStack[commandStack.length - 1][selectedCommand]);
+      } else if (e.key === 'Backspace' && searchTerm.length === 0) {
+        e.preventDefault();
+        setCommandStack(prev => prev.slice(0, -1));
+        setSearchTerm('');
+      }
+    } else if (e.key === '/') {
+      checkForSlashCommand(date, nodeId, currentNode.content + '/');
+    } else if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       const newNode = {
         id: Date.now().toString(),
         content: '',
         level: currentNode.level,
       };
-      setEntries(prevEntries =>
-        prevEntries.map(entry =>
+      setEntries((prevEntries: DailyEntry[]) =>
+        prevEntries.map((entry: DailyEntry) =>
           entry.date === date
             ? {
                 ...entry,
@@ -2157,20 +2916,18 @@ const Daily: React.FC = () => {
             : entry
         )
       );
-      // Focus on the new node after state update
       setTimeout(() => {
         contentRefs.current[`${date}-${newNode.id}`]?.focus();
       }, 0);
     } else if (e.key === 'Tab') {
       e.preventDefault();
       if (e.shiftKey && index > 0) {
-        // Outdent
-        setEntries(prevEntries =>
-          prevEntries.map(entry =>
+        setEntries((prevEntries: DailyEntry[]) =>
+          prevEntries.map((entry: DailyEntry) =>
             entry.date === date
               ? {
                   ...entry,
-                  nodes: entry.nodes.map((node, i) =>
+                  nodes: entry.nodes.map((node: Node, i: number) =>
                     i === index ? { ...node, level: Math.max(0, node.level - 1) } : node
                   )
                 }
@@ -2178,14 +2935,13 @@ const Daily: React.FC = () => {
           )
         );
       } else if (!e.shiftKey && index > 0) {
-        // Indent
         const prevNodeLevel = entry.nodes[index - 1].level;
-        setEntries(prevEntries =>
-          prevEntries.map(entry =>
+        setEntries((prevEntries: DailyEntry[]) =>
+          prevEntries.map((entry: DailyEntry) =>
             entry.date === date
               ? {
                   ...entry,
-                  nodes: entry.nodes.map((node, i) =>
+                  nodes: entry.nodes.map((node: Node, i: number) =>
                     i === index ? { ...node, level: Math.min(prevNodeLevel + 1, node.level + 1) } : node
                   )
                 }
@@ -2195,17 +2951,16 @@ const Daily: React.FC = () => {
       }
     } else if (e.key === 'Backspace' && currentNode.content === '' && index > 0) {
       e.preventDefault();
-      setEntries(prevEntries =>
-        prevEntries.map(entry =>
+      setEntries((prevEntries: DailyEntry[]) =>
+        prevEntries.map((entry: DailyEntry) =>
           entry.date === date
             ? {
                 ...entry,
-                nodes: entry.nodes.filter((_, i) => i !== index)
+                nodes: entry.nodes.filter((_, i: number) => i !== index)
               }
             : entry
         )
       );
-      // Focus on the previous node
       setTimeout(() => {
         const prevNode = entry.nodes[index - 1];
         contentRefs.current[`${date}-${prevNode.id}`]?.focus();
@@ -2235,131 +2990,345 @@ const Daily: React.FC = () => {
     }
   };
 
-  const handleMouseDown = (date: string, nodeId: string, e: React.MouseEvent) => {
-    if (e.shiftKey && selectedNodes.length > 0) {
-      // 多选逻辑
-      const entry = entries.find(e => e.date === date);
-      if (entry) {
-        const startIndex = entry.nodes.findIndex(n => n.id === selectedNodes[0]);
-        const endIndex = entry.nodes.findIndex(n => n.id === nodeId);
-        const newSelectedNodes = entry.nodes
-          .slice(Math.min(startIndex, endIndex), Math.max(startIndex, endIndex) + 1)
-          .map(n => n.id);
-        setSelectedNodes(newSelectedNodes);
-      }
+  const handleCloseSlashMenu = () => {
+    setSlashMenuOpen(false);
+    setSearchTerm('');
+    setCommandStack([SLASH_COMMANDS]); // Reset command stack
+  };
+
+  const handleCommandSelect = (command: SlashCommand, arg?: any) => {
+    handleCloseSlashMenu(); // Close menu first
+
+    if (command.subCommands && command.subCommands.length > 0) {
+      // Navigate to subcommands
+      setCommandStack(prev => [...prev, command.subCommands]);
+      setSelectedCommand(0); // Reset selected command
     } else {
-      setSelectedNodes([nodeId]);
+      // Execute command
+      if (command.execute) {
+        command.execute();
+      }
+      if (command.name === 'Insert Date' && arg) {
+        const input = contentRefs.current[`${selectedDate.format('YYYY-MM-DD')}-${activeNodeId}`];
+        if (input) {
+          const cursorPosition = input.selectionStart;
+          const textBeforeCursor = input.value.substring(0, cursorPosition);
+          const textAfterCursor = input.value.substring(cursorPosition);
+          const newText = textBeforeCursor + arg + textAfterCursor;
+
+          handleContentChange(selectedDate.format('YYYY-MM-DD'), activeNodeId!, newText);
+
+          setTimeout(() => {
+            input.selectionStart = input.selectionEnd = cursorPosition + arg.length;
+          }, 0);
+        }
+      }
     }
   };
 
-  // Sort entries by date in descending order
-  const sortedEntries = [...entries].sort((a, b) => dayjs(b.date).diff(dayjs(a.date)));
+  const handleNodeClick = (nodeId: string, event: React.MouseEvent) => {
+    if (event.shiftKey) {
+      setSelectedNodes(prev => {
+        if (prev.includes(nodeId)) {
+          return prev.filter(id => id !== nodeId);
+        } else {
+          return [...prev, nodeId];
+        }
+      });
+    } else {
+      setSelectedNodes([nodeId]);
+    }
+    setActiveNodeId(nodeId);
+  };
+
+  const handleNodeFocus = (date: string, nodeId: string) => {
+    setActiveNodeId(nodeId);
+    const node = entries.find(entry => entry.date === date)?.nodes.find(node => node.id === nodeId);
+    if (node) {
+      checkForSlashCommand(date, nodeId, node.content);
+    }
+  };
+
+  const handleNodeBlur = () => {
+    setActiveNodeId(null);
+    setSlashMenuOpen(false);
+  };
+
+  const sortedEntries = [...entries].sort((a: DailyEntry, b: DailyEntry) => dayjs(b.date).diff(dayjs(a.date)));
+
+  const uniqueEntries = sortedEntries.filter((entry, index, self) =>
+    index === self.findIndex((t) => t.date === entry.date)
+  );
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ p: 3 }}>
-        <Box sx={{ position: 'sticky', top: 0, background: 'white', zIndex: 1, pb: 2 }}>
-          <DatePicker
-            value={selectedDate}
-            onChange={handleDateChange}
-            renderInput={(params) => <IconButton {...params}><ArrowDropDownIcon /></IconButton>}
-          />
-        </Box>
-        {sortedEntries.map((entry) => (
-          <Box 
-            key={entry.date} 
-            sx={{ mb: 4 }} 
-            ref={entry.date === dayjs().format('YYYY-MM-DD') ? todayRef : null}
-          >
-            <Typography variant="h4" gutterBottom>
-              {dayjs(entry.date).format('MMM D, YYYY')}
-            </Typography>
-            {entry.nodes.map((node, index) => (
-              <Box 
-                key={node.id} 
-                sx={{ 
-                  display: 'flex', 
-                  alignItems: 'flex-start', 
-                  ml: node.level * 2,
-                  bgcolor: selectedNodes.includes(node.id) ? 'action.selected' : 'transparent',
-                }}
-                onMouseDown={(e) => handleMouseDown(entry.date, node.id, e)}
+    <ErrorBoundary>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Box sx={{ p: 3, display: 'flex' }}>
+          <Box sx={{ flexGrow: 1 }}>
+            <Box sx={{ position: 'sticky', top: 0, background: 'white', zIndex: 1, pb: 2 }}>
+              <DatePicker
+                value={selectedDate}
+                onChange={handleDateChange}
+              />
+            </Box>
+            {uniqueEntries.map((entry: DailyEntry) => (
+              <Box
+                key={entry.date}
+                sx={{ mb: 4 }}
+                ref={entry.date === dayjs().format('YYYY-MM-DD') ? todayRef : null}
               >
-                <FiberManualRecordIcon sx={{ fontSize: 8, mt: 2, mr: 1, color: 'text.secondary' }} />
-                <TextField
-                  inputRef={el => contentRefs.current[`${entry.date}-${node.id}`] = el}
-                  value={node.content}
-                  onChange={(e) => handleContentChange(entry.date, node.id, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(e, entry.date, node.id, index)}
-                  fullWidth
-                  multiline
-                  variant="standard"
-                  InputProps={{
-                    disableUnderline: true,
-                    style: { fontSize: '16px', lineHeight: '1.5' }
-                  }}
-                  placeholder={index === 0 ? "Type / for options" : ""}
-                />
+                <Typography variant="h4" gutterBottom>
+                  {dayjs(entry.date).format('MMM D, YYYY')}
+                </Typography>
+                {entry.nodes.map((node: Node, index: number) => (
+                  <Box
+                    key={node.id}
+                    onClick={(e) => handleNodeClick(node.id, e)}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      ml: node.level * 2,
+                      bgcolor: selectedNodes.length > 1 && selectedNodes.includes(node.id) ? 'action.selected' : 'transparent',
+                      cursor: 'text',
+                    }}
+                  >
+                    <FiberManualRecordIcon sx={{ fontSize: 8, mt: 2, mr: 1, color: 'text.secondary' }} />
+                    <TextField
+                      inputRef={el => contentRefs.current[`${entry.date}-${node.id}`] = el}
+                      value={node.content}
+                      onChange={(e) => handleContentChange(entry.date, node.id, e.target.value)}
+                      onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => handleKeyDown(e, entry.date, node.id, index)}
+                      onFocus={() => handleNodeFocus(entry.date, node.id)}
+                      onBlur={handleNodeBlur}
+                      fullWidth
+                      multiline
+                      variant="standard"
+                      InputProps={{
+                        disableUnderline: true,
+                        style: { fontSize: '16px', lineHeight: '1.5' }
+                      }}
+                      placeholder={index === 0 ? "Type / for options" : ""}
+                    />
+                  </Box>
+                ))}
               </Box>
             ))}
+            {backlinks.length > 0 && (
+              <BacklinksList backlinks={backlinks} />
+            )}
           </Box>
-        ))}
-      </Box>
-    </LocalizationProvider>
+          <IconButton
+            onClick={() => setIsDrawerOpen(true)}
+            sx={{ position: 'fixed', right: 16, top: 16 }}
+          >
+            <ArrowDropDownIcon />
+          </IconButton>
+          <Drawer
+            anchor="right"
+            open={isDrawerOpen}
+            onClose={() => setIsDrawerOpen(false)}
+          >
+            <Box sx={{ width: 300, p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                待办事项
+              </Typography>
+              <TaskList tasks={tasks} onTaskClick={() => {}} />
+            </Box>
+          </Drawer>
+          <SlashCommandMenu
+            commands={commandStack[commandStack.length - 1]} // Use the last commands from the stack
+            isOpen={slashMenuOpen && !!activeNodeId}
+            position={slashMenuPosition}
+            selectedIndex={selectedCommand}
+            onSelect={handleCommandSelect}
+            searchTerm={searchTerm}
+            onClose={handleCloseSlashMenu}
+          />
+        </Box>
+      </LocalizationProvider>
+    </ErrorBoundary>
   );
 };
 
 export default Daily;
 
 ----- src\pages\Dashboard.tsx -----
-import React from 'react';
-import { Grid, Paper, Typography, Box } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
-const data = [
-  { name: 'Mon', tasks: 4 },
-  { name: 'Tue', tasks: 3 },
-  { name: 'Wed', tasks: 2 },
-  { name: 'Thu', tasks: 5 },
-  { name: 'Fri', tasks: 1 },
-  { name: 'Sat', tasks: 6 },
-  { name: 'Sun', tasks: 3 },
-];
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Box, Typography, IconButton, Button } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
+
+  const tasks = [
+    { time: '09:00', task: '团队晨会' },
+    { time: '11:00', task: '客户演示' },
+    { time: '14:00', task: '代码审查' },
+    { time: '16:00', task: '项目规划会议' },
+    { time: '18:00', task: '日报总结' },
+  ];
+
+  const timeRecords = [
+    { time: '09:00-10:30', activity: '会议' },
+    { time: '11:00-13:30', activity: '编程' },
+    { time: '14:00-16:00', activity: '设计' },
+    { time: '16:00-17:30', activity: '文档' },
+  ];
+
+  const views = ['时间轴视图', '时间段视图', '日视图', '周视图', '月视图'];
+  const filters = ['全部任务', '优先级高', '今日截止', '未完成', '已完成'];
+
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Dashboard
-      </Typography>
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Tasks Overview
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="tasks" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Recent Activities
-            </Typography>
-            {/* Add a list of recent activities here */}
-          </Paper>
-        </Grid>
-        {/* Add more dashboard widgets here */}
-      </Grid>
+    <Box sx={{ display: 'flex', height: '100%' }}>
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Typography variant="h4">{t('dashboard.greeting', { username: '用户名' })}</Typography>
+          <IconButton 
+            sx={{ bgcolor: '#6750A4', color: 'white' }}
+            onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+          >
+            {rightSidebarOpen ? <ChevronRightIcon /> : <ChevronRightIcon />}
+          </IconButton>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', flexGrow: 1 }}>
+          {/* Left Timeline */}
+          <Box sx={{ width: '48%' }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>{t('dashboard.todayTasks')}</Typography>
+            <Box sx={{ bgcolor: '#E8DEF8', p: 2, mb: 3, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography>{t('dashboard.allDayTasks')}</Typography>
+              <ExpandMoreIcon />
+            </Box>
+            <Box sx={{ position: 'relative', pl: 4, height: 'calc(100% - 100px)' }}>
+              <Box sx={{ position: 'absolute', left: 8, top: 0, bottom: 50, width: 2, bgcolor: '#6750A4' }} />
+              {tasks.map((task, index) => (
+                <Box key={index} sx={{ mb: 4, display: 'flex', alignItems: 'center' }}>
+                  <Box sx={{ 
+                    width: 16, 
+                    height: 16, 
+                    borderRadius: '50%', 
+                    bgcolor: '#6750A4', 
+                    position: 'absolute',
+                    left: 2,
+                    marginTop: '3px'
+                  }} />
+                  <Typography sx={{ ml: 3 }}>{task.time} {task.task}</Typography>
+                </Box>
+              ))}
+              <IconButton 
+                sx={{ 
+                  position: 'absolute', 
+                  left: -4, 
+                  bottom: 0, 
+                  bgcolor: '#6750A4', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#5c4593' }
+                }}
+              >
+                <AddIcon />
+              </IconButton>
+            </Box>
+          </Box>
+
+          {/* Right Timeline */}
+          <Box sx={{ width: '48%' }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>{t('dashboard.timeRecords')}</Typography>
+            <Box sx={{ position: 'relative', pl: 4, height: 'calc(100% - 60px)' }}>
+              <Box sx={{ position: 'absolute', left: 8, top: 0, bottom: 50, width: 2, bgcolor: '#03DAC6' }} />
+              {timeRecords.map((record, index) => (
+                <Box key={index} sx={{ mb: 4, position: 'relative' }}>
+                  <Box sx={{ 
+                    width: 16, 
+                    height: 16, 
+                    borderRadius: '50%', 
+                    bgcolor: '#03DAC6', 
+                    position: 'absolute',
+                    left: 2,
+                    top: 12,
+                    zIndex: 1
+                  }} />
+                  <Box sx={{ 
+                    ml: 3,
+                    height: 40, 
+                    width: 'calc(100% - 24px)', 
+                    bgcolor: 'rgba(3, 218, 198, 0.2)',
+                    borderRadius: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    pl: 2
+                  }}>
+                    <Typography>{record.time} {record.activity}</Typography>
+                  </Box>
+                </Box>
+              ))}
+              <IconButton 
+                sx={{ 
+                  position: 'absolute', 
+                  left: -4, 
+                  bottom: 0, 
+                  bgcolor: '#03DAC6', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#02b9a5' }
+                }}
+              >
+                <AddIcon />
+              </IconButton>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Right Sidebar */}
+      {rightSidebarOpen && (
+        <Box sx={{ 
+          width: 220, 
+          bgcolor: 'white', 
+          py: 2, 
+          px: 1, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          borderLeft: '1px solid #e0e0e0',
+          overflow: 'auto'
+        }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>切换视图</Typography>
+          {views.map((view, index) => (
+            <Button
+              key={index}
+              variant={index === 0 ? "contained" : "outlined"}
+              sx={{
+                mb: 1,
+                bgcolor: index === 0 ? '#E8DEF8' : 'white',
+                color: '#1C1B1F',
+                border: index === 0 ? 'none' : '1px solid #CAC4D0',
+                borderRadius: '20px',
+                '&:hover': { bgcolor: index === 0 ? '#E8DEF8' : 'white' },
+              }}
+            >
+              {view}
+            </Button>
+          ))}
+          <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>切换筛选</Typography>
+          {filters.map((filter, index) => (
+            <Button
+              key={index}
+              variant={index === 0 ? "contained" : "outlined"}
+              sx={{
+                mb: 1,
+                bgcolor: index === 0 ? '#E8DEF8' : 'white',
+                color: '#1C1B1F',
+                border: index === 0 ? 'none' : '1px solid #CAC4D0',
+                borderRadius: '20px',
+                '&:hover': { bgcolor: index === 0 ? '#E8DEF8' : 'white' },
+              }}
+            >
+              {filter}
+            </Button>
+          ))}
+        </Box>
+      )}
     </Box>
   );
 };
@@ -2468,6 +3437,189 @@ const HabitManagement: React.FC = () => {
 };
 
 export default HabitManagement;
+
+----- src\pages\Settings.tsx -----
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { 
+  Box, 
+  Typography, 
+  TextField, 
+  Button, 
+  Switch, 
+  Radio, 
+  RadioGroup, 
+  FormControlLabel, 
+  FormControl, 
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon
+} from '@mui/material';
+import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import PersonIcon from '@mui/icons-material/Person';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import PaletteIcon from '@mui/icons-material/Palette';
+import LanguageIcon from '@mui/icons-material/Language';
+
+const Settings: React.FC = () => {
+  const { t } = useTranslation();
+  const { mode, setMode } = useTheme();
+  const { language, setLanguage } = useLanguage();
+  const [selectedSetting, setSelectedSetting] = useState('personal');
+
+  const handleModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setMode(event.target.value as 'light' | 'dark' | 'system');
+  };
+
+  const handleLanguageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLanguage(event.target.value);
+  };
+
+  const renderSettingContent = () => {
+    switch (selectedSetting) {
+      case 'personal':
+        return (
+          <Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>{t('settings.personalInfo')}</Typography>
+            <Box sx={{ mb: 3 }}>
+              <Typography sx={{ mb: 1 }}>{t('settings.username')}</Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                defaultValue="当前用户名"
+                sx={{ maxWidth: 400 }}
+              />
+            </Box>
+            <Box sx={{ mb: 3 }}>
+              <Typography sx={{ mb: 1 }}>{t('settings.email')}</Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                defaultValue="user@example.com"
+                sx={{ maxWidth: 400 }}
+              />
+            </Box>
+            <Button 
+              variant="contained" 
+              sx={{ 
+                bgcolor: '#E8DEF8', 
+                color: '#1C1B1F', 
+                '&:hover': { bgcolor: '#D0BCFF' },
+                borderRadius: '20px',
+                mb: 4
+              }}
+            >
+              {t('settings.changePassword')}
+            </Button>
+          </Box>
+        );
+      case 'notifications':
+        return (
+          <Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>{t('settings.notifications')}</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography>{t('settings.emailNotifications')}</Typography>
+              <Switch defaultChecked />
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography>{t('settings.inAppNotifications')}</Typography>
+              <Switch defaultChecked />
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+              <Typography>{t('settings.pushNotifications')}</Typography>
+              <Switch />
+            </Box>
+          </Box>
+        );
+      case 'theme':
+        return (
+          <Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>{t('settings.themeSettings')}</Typography>
+            <FormControl component="fieldset">
+              <RadioGroup
+                aria-label="theme"
+                name="theme"
+                value={mode}
+                onChange={handleModeChange}
+              >
+                <FormControlLabel value="dark" control={<Radio />} label={t('settings.darkMode')} />
+                <FormControlLabel value="light" control={<Radio />} label={t('settings.lightMode')} />
+                <FormControlLabel value="system" control={<Radio />} label={t('settings.systemMode')} />
+              </RadioGroup>
+            </FormControl>
+          </Box>
+        );
+      case 'language':
+        return (
+          <Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>{t('settings.languageSettings')}</Typography>
+            <FormControl component="fieldset">
+              <RadioGroup
+                aria-label="language"
+                name="language"
+                value={language}
+                onChange={handleLanguageChange}
+              >
+                <FormControlLabel value="zh" control={<Radio />} label={t('settings.chinese')} />
+                <FormControlLabel value="en" control={<Radio />} label={t('settings.english')} />
+              </RadioGroup>
+            </FormControl>
+          </Box>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Box sx={{ display: 'flex', height: '100%' }}>
+      <Box sx={{ width: 200, borderRight: '1px solid #e0e0e0', pr: 2 }}>
+        <List>
+          {[
+            { id: 'personal', icon: <PersonIcon />, text: t('settings.personalInfo') },
+            { id: 'notifications', icon: <NotificationsIcon />, text: t('settings.notifications') },
+            { id: 'theme', icon: <PaletteIcon />, text: t('settings.themeSettings') },
+            { id: 'language', icon: <LanguageIcon />, text: t('settings.languageSettings') },
+          ].map((item) => (
+            <ListItem
+              button
+              key={item.id}
+              selected={selectedSetting === item.id}
+              onClick={() => setSelectedSetting(item.id)}
+            >
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItem>
+          ))}
+        </List>
+      </Box>
+      <Box sx={{ flex: 1, p: 3 }}>
+        <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>{t('settings.title')}</Typography>
+        {renderSettingContent()}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
+          <Button 
+            variant="contained" 
+            sx={{ 
+              bgcolor: '#6750A4', 
+              color: 'white', 
+              '&:hover': { bgcolor: '#563D7C' },
+              borderRadius: '25px',
+              px: 4,
+              py: 1.5
+            }}
+          >
+            {t('settings.saveChanges')}
+          </Button>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+export default Settings;
 
 ----- src\pages\TaskManagement.tsx -----
 import React, { useState } from 'react';

@@ -1,3 +1,4 @@
+// src\pages\Daily.tsx
 import React, { useRef, KeyboardEvent, useEffect, useState } from 'react';
 import { Box, Typography, TextField, IconButton, Drawer } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -11,11 +12,18 @@ import { useTaskContext } from '../context/TaskContext';
 import TaskList from '../components/task/TaskList';
 import ErrorBoundary from '../components/ErrorBoundary';
 import SlashCommandMenu, { SlashCommand } from '../components/SlashCommandMenu';
+import BacklinksList from '../components/BacklinksList';
 
 const SLASH_COMMANDS: SlashCommand[] = [
-  { 
-    name: 'Date', 
+  {
+    name: 'Date',
     subCommands: [
+      {
+        name: 'Insert Date',
+        execute: () => {
+          // 这里实际上不需要执行anything，因为日期选择会在 SlashCommandMenu 中处理
+        }
+      },
       {
         name: 'Start time',
         execute: () => {
@@ -49,7 +57,8 @@ const SLASH_COMMANDS: SlashCommand[] = [
 ];
 
 const Daily: React.FC = () => {
-  const { entries, setEntries, selectedNodes, setSelectedNodes } = useDaily();
+  const { entries, setEntries, selectedNodes, setSelectedNodes, getBacklinks } = useDaily();
+  const [backlinks, setBacklinks] = useState<DailyEntry[]>([]);
   const { tasks } = useTaskContext();
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
   const contentRefs = useRef<{ [key: string]: HTMLTextAreaElement | null }>({});
@@ -59,7 +68,8 @@ const Daily: React.FC = () => {
   const [slashMenuPosition, setSlashMenuPosition] = useState({ top: 0, left: 0 });
   const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
   const [selectedCommand, setSelectedCommand] = useState(0);
-  const [filteredCommands, setFilteredCommands] = useState(SLASH_COMMANDS);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [commandStack, setCommandStack] = useState<SlashCommand[][]>([SLASH_COMMANDS]);
 
   useEffect(() => {
     const today = dayjs().format('YYYY-MM-DD');
@@ -70,6 +80,13 @@ const Daily: React.FC = () => {
     }
     todayRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [entries, setEntries]);
+
+  useEffect(() => {
+    if (selectedDate) {
+      const dateString = selectedDate.format('YYYY-MM-DD');
+      setBacklinks(getBacklinks(dateString));
+    }
+  }, [selectedDate, entries, getBacklinks]);
 
   const handleDateChange = (newDate: Dayjs | null) => {
     if (newDate) {
@@ -107,24 +124,21 @@ const Daily: React.FC = () => {
 
       if (lastSlashIndex === -1 || cursorPosition <= lastSlashIndex) {
         setSlashMenuOpen(false);
+        setSearchTerm('');
+        setCommandStack([SLASH_COMMANDS]); // Reset command stack
       } else {
-        const searchTerm = textBeforeCursor.slice(lastSlashIndex + 1).toLowerCase();
-        const filtered = SLASH_COMMANDS.filter(cmd => cmd.name.toLowerCase().startsWith(searchTerm));
-        setFilteredCommands(filtered);
-        
-        if (filtered.length === 0) {
-          setSlashMenuOpen(false);
-        } else {
-          const rect = input.getBoundingClientRect();
-          const lineHeight = parseInt(getComputedStyle(input).lineHeight);
-          const lines = textBeforeCursor.split('\n');
-          const currentLineIndex = lines.length - 1;
-          const top = rect.top + window.scrollY + lineHeight * (currentLineIndex + 1);
-          const left = rect.left + window.scrollX + (lines[currentLineIndex].length * 8); // Approximation for character width
-          setSlashMenuPosition({ top, left });
-          setSlashMenuOpen(true);
-          setSelectedCommand(0);
-        }
+        const newSearchTerm = textBeforeCursor.slice(lastSlashIndex + 1).toLowerCase();
+        setSearchTerm(newSearchTerm);
+
+        const rect = input.getBoundingClientRect();
+        const lineHeight = parseInt(getComputedStyle(input).lineHeight);
+        const lines = textBeforeCursor.split('\n');
+        const currentLineIndex = lines.length - 1;
+        const top = rect.top + window.scrollY + lineHeight * (currentLineIndex + 1);
+        const left = rect.left + window.scrollX + (lines[currentLineIndex].length * 8); // Approximation for character width
+        setSlashMenuPosition({ top, left });
+        setSlashMenuOpen(true);
+        setSelectedCommand(0);
       }
     }
   };
@@ -143,13 +157,17 @@ const Daily: React.FC = () => {
     if (slashMenuOpen) {
       if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSelectedCommand(prev => (prev > 0 ? prev - 1 : filteredCommands.length - 1));
+        setSelectedCommand(prev => (prev > 0 ? prev - 1 : commandStack[commandStack.length - 1].length - 1));
       } else if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedCommand(prev => (prev < filteredCommands.length - 1 ? prev + 1 : 0));
+        setSelectedCommand(prev => (prev < commandStack[commandStack.length - 1].length - 1 ? prev + 1 : 0));
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        handleCommandSelect(filteredCommands[selectedCommand]);
+        handleCommandSelect(commandStack[commandStack.length - 1][selectedCommand]);
+      } else if (e.key === 'Backspace' && searchTerm.length === 0) {
+        e.preventDefault();
+        setCommandStack(prev => prev.slice(0, -1));
+        setSearchTerm('');
       }
     } else if (e.key === '/') {
       checkForSlashCommand(date, nodeId, currentNode.content + '/');
@@ -248,12 +266,39 @@ const Daily: React.FC = () => {
     }
   };
 
-  const handleCommandSelect = (command: SlashCommand) => {
-    if (command.subCommands) {
-      setFilteredCommands(command.subCommands);
-    } else if (command.execute) {
-      command.execute();
-      setSlashMenuOpen(false);
+  const handleCloseSlashMenu = () => {
+    setSlashMenuOpen(false);
+    setSearchTerm('');
+    setCommandStack([SLASH_COMMANDS]); // Reset command stack
+  };
+
+  const handleCommandSelect = (command: SlashCommand, arg?: any) => {
+    handleCloseSlashMenu(); // Close menu first
+
+    if (command.subCommands && command.subCommands.length > 0) {
+      // Navigate to subcommands
+      setCommandStack(prev => [...prev, command.subCommands]);
+      setSelectedCommand(0); // Reset selected command
+    } else {
+      // Execute command
+      if (command.execute) {
+        command.execute();
+      }
+      if (command.name === 'Insert Date' && arg) {
+        const input = contentRefs.current[`${selectedDate.format('YYYY-MM-DD')}-${activeNodeId}`];
+        if (input) {
+          const cursorPosition = input.selectionStart;
+          const textBeforeCursor = input.value.substring(0, cursorPosition);
+          const textAfterCursor = input.value.substring(cursorPosition);
+          const newText = textBeforeCursor + arg + textAfterCursor;
+
+          handleContentChange(selectedDate.format('YYYY-MM-DD'), activeNodeId!, newText);
+
+          setTimeout(() => {
+            input.selectionStart = input.selectionEnd = cursorPosition + arg.length;
+          }, 0);
+        }
+      }
     }
   };
 
@@ -303,9 +348,9 @@ const Daily: React.FC = () => {
               />
             </Box>
             {uniqueEntries.map((entry: DailyEntry) => (
-              <Box 
-                key={entry.date} 
-                sx={{ mb: 4 }} 
+              <Box
+                key={entry.date}
+                sx={{ mb: 4 }}
                 ref={entry.date === dayjs().format('YYYY-MM-DD') ? todayRef : null}
               >
                 <Typography variant="h4" gutterBottom>
@@ -315,9 +360,9 @@ const Daily: React.FC = () => {
                   <Box
                     key={node.id}
                     onClick={(e) => handleNodeClick(node.id, e)}
-                    sx={{ 
-                      display: 'flex', 
-                      alignItems: 'flex-start', 
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
                       ml: node.level * 2,
                       bgcolor: selectedNodes.length > 1 && selectedNodes.includes(node.id) ? 'action.selected' : 'transparent',
                       cursor: 'text',
@@ -344,6 +389,9 @@ const Daily: React.FC = () => {
                 ))}
               </Box>
             ))}
+            {backlinks.length > 0 && (
+              <BacklinksList backlinks={backlinks} />
+            )}
           </Box>
           <IconButton
             onClick={() => setIsDrawerOpen(true)}
@@ -364,11 +412,13 @@ const Daily: React.FC = () => {
             </Box>
           </Drawer>
           <SlashCommandMenu
-            commands={filteredCommands}
+            commands={commandStack[commandStack.length - 1]} // Use the last commands from the stack
             isOpen={slashMenuOpen && !!activeNodeId}
             position={slashMenuPosition}
             selectedIndex={selectedCommand}
             onSelect={handleCommandSelect}
+            searchTerm={searchTerm}
+            onClose={handleCloseSlashMenu}
           />
         </Box>
       </LocalizationProvider>

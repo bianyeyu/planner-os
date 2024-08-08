@@ -1,69 +1,35 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { Routes, Route } from 'react-router-dom';
+import { CssBaseline } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import Layout from './components/layout/Layout';
+import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
-import TaskManagement from './pages/TaskManagement';
-import CalendarView from './pages/CalendarView';
-import TimeTracking from './pages/TimeTracking';
-import HabitManagement from './pages/HabitManagement';
-import TimeBlockManagement from './pages/TimeBlockManagement';
-import Daily from './pages/Daily';
+import Settings from './pages/Settings';
 import { TaskProvider } from './context/TaskContext';
 import { DailyProvider } from './context/DailyContext';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#6750A4',
-    },
-    secondary: {
-      main: '#958DA5',
-    },
-    background: {
-      default: '#FFFBFE',
-    },
-  },
-  typography: {
-    fontFamily: 'Roboto, Arial, sans-serif',
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-        },
-      },
-    },
-  },
-});
+import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <TaskProvider>
-          <DailyProvider>
-            <Router>
+    <ThemeProvider>
+      <LanguageProvider>
+        <CssBaseline />
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <TaskProvider>
+            <DailyProvider>
               <Layout>
                 <Routes>
-                  <Route path="/" element={<Navigate to="/daily" replace />} />
-                  <Route path="/daily" element={<Daily />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/tasks" element={<TaskManagement />} />
-                  <Route path="/calendar" element={<CalendarView />} />
-                  <Route path="/time-tracking" element={<TimeTracking />} />
-                  <Route path="/habits" element={<HabitManagement />} />
-                  <Route path="/time-blocks" element={<TimeBlockManagement />} />
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/settings" element={<Settings />} />
+                  {/* Add other routes as needed */}
                 </Routes>
               </Layout>
-            </Router>
-          </DailyProvider>
-        </TaskProvider>
-      </LocalizationProvider>
+            </DailyProvider>
+          </TaskProvider>
+        </LocalizationProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 };
