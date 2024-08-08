@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Box, IconButton, List, ListItem, Typography, Drawer, Button, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+import { Box, IconButton, List, ListItem, ListItemIcon, ListItemText, Typography, Drawer, Button, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
@@ -9,6 +9,8 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import InsightsIcon from '@mui/icons-material/Insights';
 import SettingsIcon from '@mui/icons-material/Settings';
 import HomeIcon from '@mui/icons-material/Home';
+import InboxIcon from '@mui/icons-material/Inbox';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import { useProject } from '../context/ProjectContext';
 
 interface LayoutProps {
@@ -68,7 +70,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           '& .MuiDrawer-paper': {
             width: sidebarOpen ? 240 : 60,
             boxSizing: 'border-box',
-            transition: 'width 0.3s',
+            transition: theme.transitions.create('width', {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
             overflowX: 'hidden',
             bgcolor: theme.palette.background.paper,
             color: theme.palette.text.primary,
@@ -80,15 +85,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <MenuIcon />
           </IconButton>
 
-          <Button 
-            onClick={() => navigate('/')}
-            sx={{ color: theme.palette.text.primary, justifyContent: 'flex-start', width: '100%', mb: 2 }}
-          >
-            {sidebarOpen ? <><HomeIcon sx={{ mr: 1 }} /> {t('navigation.home')}</> : <HomeIcon />} 
-          </Button>
-
-          {sidebarOpen && <Typography variant="h6" sx={{ mb: 2 }}>Projects</Typography>}
           <List>
+            <ListItem button onClick={() => navigate('/')}>
+              <ListItemIcon><HomeIcon /></ListItemIcon>
+              {sidebarOpen && <ListItemText primary={t('navigation.home')} />}
+            </ListItem>
+            <ListItem button onClick={() => navigate('/inbox')}>
+              <ListItemIcon><InboxIcon /></ListItemIcon>
+              {sidebarOpen && <ListItemText primary="收集箱" />}
+            </ListItem>
+          </List>
+
+          {sidebarOpen && <Typography variant="h6" sx={{ mb: 2, mt: 2 }}>Projects</Typography>}
+          <List sx={{ flexGrow: 1, overflowY: 'auto' }}>
             {sidebarOpen && projects.map((project) => (
               <ListItem 
                 button 
@@ -130,20 +139,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </ListItem>
             )}
           </List>
-          <Box sx={{ mt: 'auto' }}>
-            <Button sx={{ color: theme.palette.text.primary, justifyContent: 'flex-start', width: '100%' }}>
-              {sidebarOpen ? <><BarChartIcon sx={{ mr: 1 }} /> 数据统计</> : <BarChartIcon />}
-            </Button>
-            <Button sx={{ color: theme.palette.text.primary, justifyContent: 'flex-start', width: '100%' }}>
-              {sidebarOpen ? <><InsightsIcon sx={{ mr: 1 }} /> 数据分析</> : <InsightsIcon />}
-            </Button>
-            <Button 
-              onClick={() => navigate('/settings')} 
-              sx={{ color: theme.palette.text.primary, justifyContent: 'flex-start', width: '100%' }}
-            >
-              {sidebarOpen ? <><SettingsIcon sx={{ mr: 1 }} /> {t('navigation.settings')}</> : <SettingsIcon />} 
-            </Button>
-          </Box>
+          <List>
+            <ListItem button>
+              <ListItemIcon><FitnessCenterIcon /></ListItemIcon>
+              {sidebarOpen && <ListItemText primary="习惯管理" />}
+            </ListItem>
+            <ListItem button>
+              <ListItemIcon><BarChartIcon /></ListItemIcon>
+              {sidebarOpen && <ListItemText primary="数据统计" />}
+            </ListItem>
+            <ListItem button>
+              <ListItemIcon><InsightsIcon /></ListItemIcon>
+              {sidebarOpen && <ListItemText primary="数据分析" />}
+            </ListItem>
+            <ListItem button onClick={() => navigate('/settings')}>
+              <ListItemIcon><SettingsIcon /></ListItemIcon>
+              {sidebarOpen && <ListItemText primary={t('navigation.settings')} />}
+            </ListItem>
+          </List>
         </Box>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3, bgcolor: theme.palette.background.default, overflow: 'auto' }}>

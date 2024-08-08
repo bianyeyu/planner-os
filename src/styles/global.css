@@ -1,0 +1,33 @@
+/* 添加到你的全局样式文件中 */
+.sidebar-enter {
+    width: 0;
+    opacity: 0;
+  }
+  .sidebar-enter-active {
+    width: 240px;
+    opacity: 1;
+    transition: all 300ms ease-in;
+  }
+  .sidebar-exit {
+    width: 240px;
+    opacity: 1;
+  }
+  .sidebar-exit-active {
+    width: 0;
+    opacity: 0;
+    transition: all 300ms ease-in;
+  }
+  
+  /* 右侧边栏的动画 */
+  .sidebar-enter.right-sidebar {
+    width: 0;
+  }
+  .sidebar-enter-active.right-sidebar {
+    width: 220px;
+  }
+  .sidebar-exit.right-sidebar {
+    width: 220px;
+  }
+  .sidebar-exit-active.right-sidebar {
+    width: 0;
+  }

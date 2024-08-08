@@ -1,12 +1,8 @@
 export interface Task {
   id: string;
   title: string;
-  description?: string;
-  priority: 'low' | 'medium' | 'high';
-  startDate: string;
+  completed: boolean;
   dueDate: string;
-  tags: string[];
-  subTasks: Task[];
+  details?: string;
+  subtasks: Task[];
 }
-
-export type TaskPriority = Task['priority'];

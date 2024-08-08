@@ -41,6 +41,7 @@
 │   ├── context
 │   │   ├── DailyContext.tsx
 │   │   ├── LanguageContext.tsx
+│   │   ├── ProjectContext.tsx
 │   │   ├── TaskContext.tsx
 │   │   └── ThemeContext.tsx
 │   ├── hooks
@@ -56,6 +57,7 @@
 │   │   ├── Daily.tsx
 │   │   ├── Dashboard.tsx
 │   │   ├── HabitManagement.tsx
+│   │   ├── ProjectPage.tsx
 │   │   ├── Settings.tsx
 │   │   ├── TaskManagement.tsx
 │   │   ├── TimeBlockManagement.tsx
@@ -314,10 +316,12 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
+import ProjectPage from './pages/ProjectPage';
 import { TaskProvider } from './context/TaskContext';
 import { DailyProvider } from './context/DailyContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { ProjectProvider } from './context/ProjectContext';
 
 const App: React.FC = () => {
   return (
@@ -327,13 +331,16 @@ const App: React.FC = () => {
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <TaskProvider>
             <DailyProvider>
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/settings" element={<Settings />} />
-                  {/* Add other routes as needed */}
-                </Routes>
-              </Layout>
+              <ProjectProvider>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/project/:projectId" element={<ProjectPage />} />
+                    {/* Add other routes as needed */}
+                  </Routes>
+                </Layout>
+              </ProjectProvider>
             </DailyProvider>
           </TaskProvider>
         </LocalizationProvider>
@@ -829,17 +836,18 @@ class ErrorBoundary extends React.Component<Props, State> {
 export default ErrorBoundary;
 
 ----- src\components\Layout.tsx -----
-// src\components\Layout.tsx
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Box, IconButton, List, ListItem, Typography, Drawer, Button } from '@mui/material';
+import { Box, IconButton, List, ListItem, Typography, Drawer, Button, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import InsightsIcon from '@mui/icons-material/Insights';
 import SettingsIcon from '@mui/icons-material/Settings';
-import HomeIcon from '@mui/icons-material/Home'; // 引入 HomeIcon
+import HomeIcon from '@mui/icons-material/Home';
+import { useProject } from '../context/ProjectContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -847,24 +855,48 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  const [hoveredProject, setHoveredProject] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-
-  const projects = [
-    { icon: '🚀', name: '网站重设计' },
-    { icon: '📊', name: '数据分析报告' },
-    { icon: '📱', name: '移动应用开发' },
-    { icon: '🛠️', name: '系统维护' },
-    { icon: '📚', name: '文档编写' }
-  ];
+  const theme = useTheme();
+  const { projects, addProject, deleteProject } = useProject();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const handleAddProject = () => {
+    if (newProjectName.trim()) {
+      const newProject = {
+        name: newProjectName,
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        progress: 0,
+        tasks: [],
+        documents: [],
+        notes: []
+      };
+      addProject(newProject);
+      setNewProjectDialogOpen(false);
+      setNewProjectName('');
+    }
+  };
+
+  const handleDeleteProject = (id: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this project?')) {
+      deleteProject(id);
+      if (location.pathname === `/project/${id}`) {
+        navigate('/');
+      }
+    }
+  };
+
   return (
-    <Box sx={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+    <Box sx={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', bgcolor: theme.palette.background.default, color: theme.palette.text.primary }}>
       <Drawer
         variant="permanent"
         open={sidebarOpen}
@@ -876,60 +908,103 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             boxSizing: 'border-box',
             transition: 'width 0.3s',
             overflowX: 'hidden',
-            bgcolor: 'white',
+            bgcolor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
           },
         }}
       >
         <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <IconButton onClick={toggleSidebar} sx={{ alignSelf: 'flex-start', mb: 2, bgcolor: '#6750A4', color: 'white' }}>
+          <IconButton onClick={toggleSidebar} sx={{ alignSelf: 'flex-start', mb: 2, color: theme.palette.primary.main }}>
             <MenuIcon />
           </IconButton>
 
-          {/* 添加 Home 按钮 */}
           <Button 
-            onClick={() => navigate('/')} // 点击跳转到首页
-            sx={{ color: '#49454F', justifyContent: 'flex-start', width: '100%', mb: 2 }}
+            onClick={() => navigate('/')}
+            sx={{ color: theme.palette.text.primary, justifyContent: 'flex-start', width: '100%', mb: 2 }}
           >
             {sidebarOpen ? <><HomeIcon sx={{ mr: 1 }} /> {t('navigation.home')}</> : <HomeIcon />} 
           </Button>
 
           {sidebarOpen && <Typography variant="h6" sx={{ mb: 2 }}>Projects</Typography>}
           <List>
-            {sidebarOpen && projects.map((project, index) => (
-              <ListItem key={index} sx={{ py: 0.5 }}>
-                <Typography variant="body2" sx={{ color: '#49454F' }}>
-                  {project.icon} {project.name}
+            {sidebarOpen && projects.map((project) => (
+              <ListItem 
+                button 
+                key={project.id}
+                onClick={() => navigate(`/project/${project.id}`)}
+                onMouseEnter={() => setHoveredProject(project.id)}
+                onMouseLeave={() => setHoveredProject(null)}
+                sx={{ 
+                  py: 0.5, 
+                  color: location.pathname === `/project/${project.id}` ? theme.palette.primary.main : theme.palette.text.secondary,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Typography variant="body2">
+                  {project.name}
                 </Typography>
+                {hoveredProject === project.id && (
+                  <IconButton
+                    size="small"
+                    onClick={(e) => handleDeleteProject(project.id, e)}
+                    sx={{ color: theme.palette.error.main }}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                )}
               </ListItem>
             ))}
             {sidebarOpen && (
               <ListItem>
-                <Button startIcon={<AddIcon />} sx={{ color: '#6750A4', justifyContent: 'flex-start', px: 0 }}>
+                <Button 
+                  startIcon={<AddIcon />} 
+                  sx={{ color: theme.palette.primary.main, justifyContent: 'flex-start', px: 0 }}
+                  onClick={() => setNewProjectDialogOpen(true)}
+                >
                   添加项目
                 </Button>
               </ListItem>
             )}
           </List>
           <Box sx={{ mt: 'auto' }}>
-            <Button sx={{ color: '#49454F', justifyContent: 'flex-start', width: '100%' }}>
+            <Button sx={{ color: theme.palette.text.primary, justifyContent: 'flex-start', width: '100%' }}>
               {sidebarOpen ? <><BarChartIcon sx={{ mr: 1 }} /> 数据统计</> : <BarChartIcon />}
             </Button>
-            <Button sx={{ color: '#49454F', justifyContent: 'flex-start', width: '100%' }}>
+            <Button sx={{ color: theme.palette.text.primary, justifyContent: 'flex-start', width: '100%' }}>
               {sidebarOpen ? <><InsightsIcon sx={{ mr: 1 }} /> 数据分析</> : <InsightsIcon />}
             </Button>
-            {/* 修改 Settings 按钮，点击跳转到 /settings */}
             <Button 
               onClick={() => navigate('/settings')} 
-              sx={{ color: '#49454F', justifyContent: 'flex-start', width: '100%' }}
+              sx={{ color: theme.palette.text.primary, justifyContent: 'flex-start', width: '100%' }}
             >
               {sidebarOpen ? <><SettingsIcon sx={{ mr: 1 }} /> {t('navigation.settings')}</> : <SettingsIcon />} 
             </Button>
           </Box>
         </Box>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3, bgcolor: '#F7F2FA', overflow: 'auto' }}>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, bgcolor: theme.palette.background.default, overflow: 'auto' }}>
         {children}
       </Box>
+      <Dialog open={newProjectDialogOpen} onClose={() => setNewProjectDialogOpen(false)}>
+        <DialogTitle>创建新项目</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="项目名称"
+            fullWidth
+            variant="outlined"
+            value={newProjectName}
+            onChange={(e) => setNewProjectName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setNewProjectDialogOpen(false)}>取消</Button>
+          <Button onClick={handleAddProject}>创建</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
@@ -2418,6 +2493,145 @@ export const useLanguage = () => {
   return context;
 };
 
+----- src\context\ProjectContext.tsx -----
+import React, { createContext, useState, useContext, useEffect } from 'react';
+
+interface Task {
+  id: string;
+  title: string;
+  dueDate: string;
+  progress: number;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  progress: number;
+  tasks: Task[];
+  documents: { name: string; icon: string }[];
+  notes: string[];
+}
+
+interface ProjectContextType {
+    projects: Project[];
+    addProject: (project: Omit<Project, 'id'>) => void;
+    updateProject: (id: string, project: Partial<Project>) => void;
+    deleteProject: (id: string) => void;  // 新增删除项目的方法
+    addTask: (projectId: string, task: Omit<Task, 'id'>) => void;
+    updateTask: (projectId: string, taskId: string, task: Partial<Task>) => void;
+    addDocument: (projectId: string, document: { name: string; icon: string }) => void;
+    addNote: (projectId: string, note: string) => void;
+  }
+  
+  const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
+
+const initialProjects: Project[] = [
+  {
+    id: '1',
+    name: '网站重设计',
+    startDate: '2023-06-01',
+    endDate: '2023-12-31',
+    progress: 65,
+    tasks: [
+      { id: '1', title: '设计用户界面', dueDate: '2023-08-31', progress: 80 },
+      { id: '2', title: '前端开发', dueDate: '2023-10-31', progress: 0 },
+      { id: '3', title: '后端开发', dueDate: '2023-11-30', progress: 50 },
+    ],
+    documents: [
+      { name: '项目需求文档.pdf', icon: '📄' },
+      { name: 'UI设计稿.sketch', icon: '📄' },
+    ],
+    notes: ['初始项目讨论完成', '需要安排第一次团队会议'],
+  },
+  // 可以添加更多初始项目
+];
+
+export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [projects, setProjects] = useState<Project[]>(() => {
+      const storedProjects = localStorage.getItem('projects');
+      return storedProjects ? JSON.parse(storedProjects) : initialProjects;
+    });
+  
+    useEffect(() => {
+      localStorage.setItem('projects', JSON.stringify(projects));
+    }, [projects]);
+
+  const addProject = (project: Omit<Project, 'id'>) => {
+    const newProject: Project = { 
+      ...project, 
+      id: Date.now().toString(),
+      tasks: [],
+      documents: [],
+      notes: []
+    };
+    setProjects([...projects, newProject]);
+  };
+
+  const updateProject = (id: string, updatedProject: Partial<Project>) => {
+    setProjects(projects.map(project => 
+      project.id === id ? { ...project, ...updatedProject } : project
+    ));
+  };
+
+  const addTask = (projectId: string, task: Omit<Task, 'id'>) => {
+    const newTask: Task = { ...task, id: Date.now().toString() };
+    setProjects(projects.map(project => 
+      project.id === projectId ? { ...project, tasks: [...project.tasks, newTask] } : project
+    ));
+  };
+
+  const updateTask = (projectId: string, taskId: string, updatedTask: Partial<Task>) => {
+    setProjects(projects.map(project => 
+      project.id === projectId ? {
+        ...project,
+        tasks: project.tasks.map(task => 
+          task.id === taskId ? { ...task, ...updatedTask } : task
+        )
+      } : project
+    ));
+  };
+
+  const addDocument = (projectId: string, document: { name: string; icon: string }) => {
+    setProjects(projects.map(project => 
+      project.id === projectId ? { ...project, documents: [...project.documents, document] } : project
+    ));
+  };
+
+  const addNote = (projectId: string, note: string) => {
+    setProjects(projects.map(project => 
+      project.id === projectId ? { ...project, notes: [...project.notes, note] } : project
+    ));
+  };
+  const deleteProject = (id: string) => {
+    setProjects(projects.filter(project => project.id !== id));
+  };
+
+  return (
+    <ProjectContext.Provider value={{ 
+      projects, 
+      addProject, 
+      updateProject, 
+      deleteProject,  // 添加删除项目的方法
+      addTask, 
+      updateTask, 
+      addDocument, 
+      addNote 
+    }}>
+      {children}
+    </ProjectContext.Provider>
+  );
+};
+
+export const useProject = () => {
+  const context = useContext(ProjectContext);
+  if (context === undefined) {
+    throw new Error('useProject must be used within a ProjectProvider');
+  }
+  return context;
+};
+
 ----- src\context\TaskContext.tsx -----
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Task } from '../types/task';
@@ -2474,7 +2688,6 @@ export const useTaskContext = () => {
 };
 
 ----- src\context\ThemeContext.tsx -----
-// src\context\ThemeContext.tsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { 
   ThemeProvider as MuiThemeProvider, 
@@ -2511,7 +2724,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     mode,
     ...(mode === 'light'
       ? {
-          // palette values for light mode
           primary: {
             main: '#6750A4',
           },
@@ -2520,11 +2732,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           },
           background: {
             default: '#FFFFFF',
-            paper: '#FFFFFF',
+            paper: '#F7F2FA',
+          },
+          text: {
+            primary: '#1C1B1F',
           },
         }
       : {
-          // palette values for dark mode
           primary: {
             main: '#D0BCFF',
           },
@@ -2533,10 +2747,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           },
           background: {
             default: '#1C1B1F',
-            paper: '#1C1B1F',
+            paper: '#2B2930',
           },
           text: {
-            primary: '#FFFFFF',
+            primary: '#E6E1E5',
           }
         }),
   });
@@ -2552,15 +2766,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     [mode]
   );
 
-  // Apply global background color
-  const globalBackgroundColor = getActualMode() === 'dark' ? '#121212' : '#FFFFFF';
-
   return (
     <ThemeContext.Provider value={{ mode, setMode }}>
       <MuiThemeProvider theme={theme}>
-        <div style={{ backgroundColor: globalBackgroundColor, minHeight: '100vh' }}> {/* Apply background color to a div wrapping the app */}
-          {children}
-        </div>
+        {children}
       </MuiThemeProvider>
     </ThemeContext.Provider>
   );
@@ -3155,7 +3364,7 @@ export default Daily;
 ----- src\pages\Dashboard.tsx -----
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Typography, IconButton, Button } from '@mui/material';
+import { Box, Typography, IconButton, Button, useTheme } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -3163,6 +3372,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
+  const theme = useTheme();
 
   const tasks = [
     { time: '09:00', task: '团队晨会' },
@@ -3188,7 +3398,7 @@ const Dashboard: React.FC = () => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
           <Typography variant="h4">{t('dashboard.greeting', { username: '用户名' })}</Typography>
           <IconButton 
-            sx={{ bgcolor: '#6750A4', color: 'white' }}
+            sx={{ bgcolor: theme.palette.primary.main, color: theme.palette.primary.contrastText }}
             onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
           >
             {rightSidebarOpen ? <ChevronRightIcon /> : <ChevronRightIcon />}
@@ -3198,19 +3408,19 @@ const Dashboard: React.FC = () => {
           {/* Left Timeline */}
           <Box sx={{ width: '48%' }}>
             <Typography variant="h5" sx={{ mb: 2 }}>{t('dashboard.todayTasks')}</Typography>
-            <Box sx={{ bgcolor: '#E8DEF8', p: 2, mb: 3, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ bgcolor: theme.palette.background.paper, p: 2, mb: 3, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Typography>{t('dashboard.allDayTasks')}</Typography>
               <ExpandMoreIcon />
             </Box>
             <Box sx={{ position: 'relative', pl: 4, height: 'calc(100% - 100px)' }}>
-              <Box sx={{ position: 'absolute', left: 8, top: 0, bottom: 50, width: 2, bgcolor: '#6750A4' }} />
+              <Box sx={{ position: 'absolute', left: 8, top: 0, bottom: 50, width: 2, bgcolor: theme.palette.primary.main }} />
               {tasks.map((task, index) => (
                 <Box key={index} sx={{ mb: 4, display: 'flex', alignItems: 'center' }}>
                   <Box sx={{ 
                     width: 16, 
                     height: 16, 
                     borderRadius: '50%', 
-                    bgcolor: '#6750A4', 
+                    bgcolor: theme.palette.primary.main, 
                     position: 'absolute',
                     left: 2,
                     marginTop: '3px'
@@ -3223,9 +3433,9 @@ const Dashboard: React.FC = () => {
                   position: 'absolute', 
                   left: -4, 
                   bottom: 0, 
-                  bgcolor: '#6750A4', 
-                  color: 'white',
-                  '&:hover': { bgcolor: '#5c4593' }
+                  bgcolor: theme.palette.primary.main, 
+                  color: theme.palette.primary.contrastText,
+                  '&:hover': { bgcolor: theme.palette.primary.dark }
                 }}
               >
                 <AddIcon />
@@ -3237,14 +3447,14 @@ const Dashboard: React.FC = () => {
           <Box sx={{ width: '48%' }}>
             <Typography variant="h5" sx={{ mb: 2 }}>{t('dashboard.timeRecords')}</Typography>
             <Box sx={{ position: 'relative', pl: 4, height: 'calc(100% - 60px)' }}>
-              <Box sx={{ position: 'absolute', left: 8, top: 0, bottom: 50, width: 2, bgcolor: '#03DAC6' }} />
+              <Box sx={{ position: 'absolute', left: 8, top: 0, bottom: 50, width: 2, bgcolor: theme.palette.secondary.main }} />
               {timeRecords.map((record, index) => (
                 <Box key={index} sx={{ mb: 4, position: 'relative' }}>
                   <Box sx={{ 
                     width: 16, 
                     height: 16, 
                     borderRadius: '50%', 
-                    bgcolor: '#03DAC6', 
+                    bgcolor: theme.palette.secondary.main, 
                     position: 'absolute',
                     left: 2,
                     top: 12,
@@ -3254,7 +3464,7 @@ const Dashboard: React.FC = () => {
                     ml: 3,
                     height: 40, 
                     width: 'calc(100% - 24px)', 
-                    bgcolor: 'rgba(3, 218, 198, 0.2)',
+                    bgcolor: theme.palette.action.hover,
                     borderRadius: 1,
                     display: 'flex',
                     alignItems: 'center',
@@ -3269,9 +3479,9 @@ const Dashboard: React.FC = () => {
                   position: 'absolute', 
                   left: -4, 
                   bottom: 0, 
-                  bgcolor: '#03DAC6', 
-                  color: 'white',
-                  '&:hover': { bgcolor: '#02b9a5' }
+                  bgcolor: theme.palette.secondary.main, 
+                  color: theme.palette.secondary.contrastText,
+                  '&:hover': { bgcolor: theme.palette.secondary.dark }
                 }}
               >
                 <AddIcon />
@@ -3285,12 +3495,12 @@ const Dashboard: React.FC = () => {
       {rightSidebarOpen && (
         <Box sx={{ 
           width: 220, 
-          bgcolor: 'white', 
+          bgcolor: theme.palette.background.paper, 
           py: 2, 
           px: 1, 
           display: 'flex', 
           flexDirection: 'column', 
-          borderLeft: '1px solid #e0e0e0',
+          borderLeft: `1px solid ${theme.palette.divider}`,
           overflow: 'auto'
         }}>
           <Typography variant="h6" sx={{ mb: 2 }}>切换视图</Typography>
@@ -3300,11 +3510,11 @@ const Dashboard: React.FC = () => {
               variant={index === 0 ? "contained" : "outlined"}
               sx={{
                 mb: 1,
-                bgcolor: index === 0 ? '#E8DEF8' : 'white',
-                color: '#1C1B1F',
-                border: index === 0 ? 'none' : '1px solid #CAC4D0',
+                bgcolor: index === 0 ? theme.palette.primary.main : 'transparent',
+                color: index === 0 ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                border: index === 0 ? 'none' : `1px solid ${theme.palette.divider}`,
                 borderRadius: '20px',
-                '&:hover': { bgcolor: index === 0 ? '#E8DEF8' : 'white' },
+                '&:hover': { bgcolor: index === 0 ? theme.palette.primary.dark : theme.palette.action.hover },
               }}
             >
               {view}
@@ -3317,11 +3527,11 @@ const Dashboard: React.FC = () => {
               variant={index === 0 ? "contained" : "outlined"}
               sx={{
                 mb: 1,
-                bgcolor: index === 0 ? '#E8DEF8' : 'white',
-                color: '#1C1B1F',
-                border: index === 0 ? 'none' : '1px solid #CAC4D0',
+                bgcolor: index === 0 ? theme.palette.primary.main : 'transparent',
+                color: index === 0 ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                border: index === 0 ? 'none' : `1px solid ${theme.palette.divider}`,
                 borderRadius: '20px',
-                '&:hover': { bgcolor: index === 0 ? '#E8DEF8' : 'white' },
+                '&:hover': { bgcolor: index === 0 ? theme.palette.primary.dark : theme.palette.action.hover },
               }}
             >
               {filter}
@@ -3438,6 +3648,146 @@ const HabitManagement: React.FC = () => {
 
 export default HabitManagement;
 
+----- src\pages\ProjectPage.tsx -----
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Box, Typography, Button, LinearProgress, List, ListItem, ListItemText, TextField } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import AddIcon from '@mui/icons-material/Add';
+import { useProject } from '../context/ProjectContext';
+
+const ProjectPage: React.FC = () => {
+  const { projectId } = useParams<{ projectId: string }>();
+  const theme = useTheme();
+  const [newNote, setNewNote] = useState('');
+  const { projects, updateProject, addTask, updateTask, addDocument, addNote } = useProject();
+
+  const project = projects.find(p => p.id === projectId);
+
+  if (!project) {
+    return <Typography>Project not found</Typography>;
+  }
+
+  const handleAddNote = () => {
+    if (newNote.trim()) {
+      addNote(project.id, newNote);
+      setNewNote('');
+    }
+  };
+
+  const handleAddTask = () => {
+    addTask(project.id, {
+      title: 'New Task',
+      dueDate: new Date().toISOString().split('T')[0],
+      progress: 0
+    });
+  };
+
+  const handleUpdateTaskProgress = (taskId: string, newProgress: number) => {
+    updateTask(project.id, taskId, { progress: newProgress });
+  };
+
+  const handleAddDocument = () => {
+    const documentName = prompt('Enter document name:');
+    if (documentName) {
+      addDocument(project.id, { name: documentName, icon: '📄' });
+    }
+  };
+
+  return (
+    <Box sx={{ display: 'flex', height: '100%' }}>
+      <Box sx={{ flex: 1, p: 3, overflow: 'auto' }}>
+        <Typography variant="h4" gutterBottom>{project.name}</Typography>
+        
+        {/* 项目概览 */}
+        <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>项目概览</Typography>
+        <Box sx={{ bgcolor: theme.palette.background.paper, p: 2, borderRadius: 2 }}>
+          <Typography>开始日期: {project.startDate}</Typography>
+          <Typography>预计完成: {project.endDate}</Typography>
+          <Typography>进度: {project.progress}%</Typography>
+          <LinearProgress variant="determinate" value={project.progress} sx={{ mt: 1 }} />
+        </Box>
+        
+        {/* 任务列表 */}
+        <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>任务列表</Typography>
+        {project.tasks.map((task) => (
+          <Box key={task.id} sx={{ bgcolor: theme.palette.background.paper, p: 2, mb: 2, borderRadius: 2 }}>
+            <Typography variant="h6">{task.title}</Typography>
+            <Typography>截止日期: {task.dueDate}</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+              <LinearProgress 
+                variant="determinate" 
+                value={task.progress} 
+                sx={{ flexGrow: 1, mr: 2 }} 
+              />
+              <TextField
+                type="number"
+                value={task.progress}
+                onChange={(e) => handleUpdateTaskProgress(task.id, Number(e.target.value))}
+                inputProps={{ min: 0, max: 100 }}
+                sx={{ width: 70 }}
+              />
+              <Typography variant="body2">%</Typography>
+            </Box>
+          </Box>
+        ))}
+        
+        <Button 
+          variant="contained" 
+          startIcon={<AddIcon />} 
+          sx={{ mt: 2 }}
+          onClick={handleAddTask}
+        >
+          添加任务
+        </Button>
+      </Box>
+      
+      {/* 右侧边栏 */}
+      <Box sx={{ width: 240, p: 2, bgcolor: theme.palette.background.paper, borderLeft: `1px solid ${theme.palette.divider}` }}>
+        <Typography variant="h6" gutterBottom>项目文档</Typography>
+        <List>
+          {project.documents.map((doc, index) => (
+            <ListItem key={index} sx={{ py: 0 }}>
+              <ListItemText primary={`${doc.icon} ${doc.name}`} />
+            </ListItem>
+          ))}
+        </List>
+        <Button 
+          variant="outlined" 
+          startIcon={<AddIcon />} 
+          sx={{ mt: 1 }}
+          onClick={handleAddDocument}
+        >
+          添加文档
+        </Button>
+        
+        <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>笔记</Typography>
+        <Box sx={{ mb: 2 }}>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            variant="outlined"
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            placeholder="输入新笔记..."
+          />
+          <Button variant="contained" onClick={handleAddNote} sx={{ mt: 1 }}>添加笔记</Button>
+        </Box>
+        <List sx={{ bgcolor: theme.palette.action.hover, borderRadius: 2, maxHeight: 200, overflowY: 'auto' }}>
+          {project.notes.map((note, index) => (
+            <ListItem key={index}>
+              <ListItemText primary={note} />
+            </ListItem>
+          ))}
+        </List>
+      </Box>
+    </Box>
+  );
+};
+
+export default ProjectPage;
+
 ----- src\pages\Settings.tsx -----
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -3451,11 +3801,11 @@ import {
   RadioGroup, 
   FormControlLabel, 
   FormControl, 
-  Divider,
   List,
   ListItem,
   ListItemText,
-  ListItemIcon
+  ListItemIcon,
+  useTheme as useMuiTheme,
 } from '@mui/material';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -3469,6 +3819,7 @@ const Settings: React.FC = () => {
   const { mode, setMode } = useTheme();
   const { language, setLanguage } = useLanguage();
   const [selectedSetting, setSelectedSetting] = useState('personal');
+  const muiTheme = useMuiTheme();
 
   const handleModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMode(event.target.value as 'light' | 'dark' | 'system');
@@ -3505,9 +3856,9 @@ const Settings: React.FC = () => {
             <Button 
               variant="contained" 
               sx={{ 
-                bgcolor: '#E8DEF8', 
-                color: '#1C1B1F', 
-                '&:hover': { bgcolor: '#D0BCFF' },
+                bgcolor: muiTheme.palette.primary.main,
+                color: muiTheme.palette.primary.contrastText,
+                '&:hover': { bgcolor: muiTheme.palette.primary.dark },
                 borderRadius: '20px',
                 mb: 4
               }}
@@ -3575,8 +3926,8 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', height: '100%' }}>
-      <Box sx={{ width: 200, borderRight: '1px solid #e0e0e0', pr: 2 }}>
+    <Box sx={{ display: 'flex', height: '100%', bgcolor: muiTheme.palette.background.default, color: muiTheme.palette.text.primary }}>
+      <Box sx={{ width: 200, borderRight: `1px solid ${muiTheme.palette.divider}`, pr: 2 }}>
         <List>
           {[
             { id: 'personal', icon: <PersonIcon />, text: t('settings.personalInfo') },
@@ -3596,16 +3947,16 @@ const Settings: React.FC = () => {
           ))}
         </List>
       </Box>
-      <Box sx={{ flex: 1, p: 3 }}>
+      <Box sx={{ flex: 1, p: 3, bgcolor: muiTheme.palette.background.paper }}>
         <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>{t('settings.title')}</Typography>
         {renderSettingContent()}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
           <Button 
             variant="contained" 
             sx={{ 
-              bgcolor: '#6750A4', 
-              color: 'white', 
-              '&:hover': { bgcolor: '#563D7C' },
+              bgcolor: muiTheme.palette.primary.main, 
+              color: muiTheme.palette.primary.contrastText, 
+              '&:hover': { bgcolor: muiTheme.palette.primary.dark },
               borderRadius: '25px',
               px: 4,
               py: 1.5
