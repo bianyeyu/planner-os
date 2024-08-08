@@ -6,10 +6,12 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
+import ProjectPage from './pages/ProjectPage';
 import { TaskProvider } from './context/TaskContext';
 import { DailyProvider } from './context/DailyContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { ProjectProvider } from './context/ProjectContext';
 
 const App: React.FC = () => {
   return (
@@ -19,13 +21,16 @@ const App: React.FC = () => {
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <TaskProvider>
             <DailyProvider>
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/settings" element={<Settings />} />
-                  {/* Add other routes as needed */}
-                </Routes>
-              </Layout>
+              <ProjectProvider>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/project/:projectId" element={<ProjectPage />} />
+                    {/* Add other routes as needed */}
+                  </Routes>
+                </Layout>
+              </ProjectProvider>
             </DailyProvider>
           </TaskProvider>
         </LocalizationProvider>
