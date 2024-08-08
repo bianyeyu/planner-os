@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
 import { 
   ThemeProvider as MuiThemeProvider, 
   createTheme, 
@@ -6,37 +6,48 @@ import {
   PaletteOptions 
 } from '@mui/material';
 
+type ThemeMode = 'light' | 'dark' | 'system' | 'custom';
+
 type ThemeContextType = {
-  mode: 'light' | 'dark' | 'system';
-  setMode: (mode: 'light' | 'dark' | 'system') => void;
+  mode: ThemeMode;
+  setMode: (mode: ThemeMode) => void;
+  primaryColor: string;
+  setPrimaryColor: (color: string) => void;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mode, setMode] = useState<'light' | 'dark' | 'system'>(() => {
+  const [mode, setMode] = useState<ThemeMode>(() => {
     const savedMode = localStorage.getItem('themeMode');
-    return (savedMode as 'light' | 'dark' | 'system') || 'system';
+    return (savedMode as ThemeMode) || 'system';
+  });
+  const [primaryColor, setPrimaryColor] = useState<string>(() => {
+    return localStorage.getItem('themePrimaryColor') || '#6750A4';
   });
 
   useEffect(() => {
     localStorage.setItem('themeMode', mode);
   }, [mode]);
 
+  useEffect(() => {
+    localStorage.setItem('themePrimaryColor', primaryColor);
+  }, [primaryColor]);
+
   const getActualMode = (): PaletteMode => {
     if (mode === 'system') {
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
-    return mode;
+    return mode === 'custom' ? 'light' : mode;
   };
 
   const getDesignTokens = (mode: PaletteMode): PaletteOptions => ({
     mode,
+    primary: {
+      main: primaryColor,
+    },
     ...(mode === 'light'
       ? {
-          primary: {
-            main: '#6750A4',
-          },
           secondary: {
             main: '#625B71',
           },
@@ -49,9 +60,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           },
         }
       : {
-          primary: {
-            main: '#D0BCFF',
-          },
           secondary: {
             main: '#CCC2DC',
           },
@@ -65,7 +73,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }),
   });
 
-  const theme = React.useMemo(
+  const theme = useMemo(
     () =>
       createTheme({
         palette: getDesignTokens(getActualMode()),
@@ -73,11 +81,18 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           fontFamily: 'Roboto, sans-serif',
         },
       }),
-    [mode]
+    [mode, primaryColor]
   );
 
+  const contextValue = useMemo(() => ({
+    mode,
+    setMode,
+    primaryColor,
+    setPrimaryColor,
+  }), [mode, primaryColor]);
+
   return (
-    <ThemeContext.Provider value={{ mode, setMode }}>
+    <ThemeContext.Provider value={contextValue}>
       <MuiThemeProvider theme={theme}>
         {children}
       </MuiThemeProvider>

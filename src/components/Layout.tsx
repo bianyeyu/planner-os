@@ -70,7 +70,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           '& .MuiDrawer-paper': {
             width: sidebarOpen ? 240 : 60,
             boxSizing: 'border-box',
-            transition: theme.transitions.create('width', {
+            transition: theme.transitions.create(['width', 'margin'], {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
@@ -80,24 +80,42 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           },
         }}
       >
-        <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <IconButton onClick={toggleSidebar} sx={{ alignSelf: 'flex-start', mb: 2, color: theme.palette.primary.main }}>
+        <Box sx={{ 
+          p: 2, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          height: '100%',
+          alignItems: sidebarOpen ? 'flex-start' : 'center',
+        }}>
+          <IconButton 
+            onClick={toggleSidebar} 
+            sx={{ 
+              alignSelf: 'center', 
+              mb: 2, 
+              color: theme.palette.primary.main,
+              ...(sidebarOpen && { alignSelf: 'flex-start' })
+            }}
+          >
             <MenuIcon />
           </IconButton>
 
-          <List>
-            <ListItem button onClick={() => navigate('/')}>
-              <ListItemIcon><HomeIcon /></ListItemIcon>
+          <List sx={{ width: '100%' }}>
+            <ListItem button onClick={() => navigate('/')} sx={{ mb: 1, justifyContent: sidebarOpen ? 'flex-start' : 'center' }}>
+              <ListItemIcon sx={{ minWidth: sidebarOpen ? 40 : 'auto', justifyContent: 'center' }}>
+                <HomeIcon />
+              </ListItemIcon>
               {sidebarOpen && <ListItemText primary={t('navigation.home')} />}
             </ListItem>
-            <ListItem button onClick={() => navigate('/inbox')}>
-              <ListItemIcon><InboxIcon /></ListItemIcon>
+            <ListItem button onClick={() => navigate('/inbox')} sx={{ mb: 1, justifyContent: sidebarOpen ? 'flex-start' : 'center' }}>
+              <ListItemIcon sx={{ minWidth: sidebarOpen ? 40 : 'auto', justifyContent: 'center' }}>
+                <InboxIcon />
+              </ListItemIcon>
               {sidebarOpen && <ListItemText primary="收集箱" />}
             </ListItem>
           </List>
 
           {sidebarOpen && <Typography variant="h6" sx={{ mb: 2, mt: 2 }}>Projects</Typography>}
-          <List sx={{ flexGrow: 1, overflowY: 'auto' }}>
+          <List sx={{ flexGrow: 1, overflowY: 'auto', width: '100%' }}>
             {sidebarOpen && projects.map((project) => (
               <ListItem 
                 button 
@@ -139,21 +157,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </ListItem>
             )}
           </List>
-          <List>
-            <ListItem button>
-              <ListItemIcon><FitnessCenterIcon /></ListItemIcon>
+          <List sx={{ width: '100%' }}>
+            <ListItem button sx={{ justifyContent: sidebarOpen ? 'flex-start' : 'center' }}>
+              <ListItemIcon sx={{ minWidth: sidebarOpen ? 40 : 'auto', justifyContent: 'center' }}>
+                <FitnessCenterIcon />
+              </ListItemIcon>
               {sidebarOpen && <ListItemText primary="习惯管理" />}
             </ListItem>
-            <ListItem button>
-              <ListItemIcon><BarChartIcon /></ListItemIcon>
+            <ListItem button sx={{ justifyContent: sidebarOpen ? 'flex-start' : 'center' }}>
+              <ListItemIcon sx={{ minWidth: sidebarOpen ? 40 : 'auto', justifyContent: 'center' }}>
+                <BarChartIcon />
+              </ListItemIcon>
               {sidebarOpen && <ListItemText primary="数据统计" />}
             </ListItem>
-            <ListItem button>
-              <ListItemIcon><InsightsIcon /></ListItemIcon>
+            <ListItem button sx={{ justifyContent: sidebarOpen ? 'flex-start' : 'center' }}>
+              <ListItemIcon sx={{ minWidth: sidebarOpen ? 40 : 'auto', justifyContent: 'center' }}>
+                <InsightsIcon />
+              </ListItemIcon>
               {sidebarOpen && <ListItemText primary="数据分析" />}
             </ListItem>
-            <ListItem button onClick={() => navigate('/settings')}>
-              <ListItemIcon><SettingsIcon /></ListItemIcon>
+            <ListItem button onClick={() => navigate('/settings')} sx={{ justifyContent: sidebarOpen ? 'flex-start' : 'center' }}>
+              <ListItemIcon sx={{ minWidth: sidebarOpen ? 40 : 'auto', justifyContent: 'center' }}>
+                <SettingsIcon />
+              </ListItemIcon>
               {sidebarOpen && <ListItemText primary={t('navigation.settings')} />}
             </ListItem>
           </List>

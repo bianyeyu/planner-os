@@ -5,4 +5,5 @@ export interface Task {
   dueDate: string;
   details?: string;
   subtasks: Task[];
+  progress: number;
 }

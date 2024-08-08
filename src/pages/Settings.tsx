@@ -16,6 +16,7 @@ import {
   ListItemIcon,
   useTheme as useMuiTheme,
 } from '@mui/material';
+import { ChromePicker } from 'react-color';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import PersonIcon from '@mui/icons-material/Person';
@@ -25,17 +26,22 @@ import LanguageIcon from '@mui/icons-material/Language';
 
 const Settings: React.FC = () => {
   const { t } = useTranslation();
-  const { mode, setMode } = useTheme();
+  const { mode, setMode, primaryColor, setPrimaryColor } = useTheme();
   const { language, setLanguage } = useLanguage();
   const [selectedSetting, setSelectedSetting] = useState('personal');
   const muiTheme = useMuiTheme();
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
   const handleModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setMode(event.target.value as 'light' | 'dark' | 'system');
+    setMode(event.target.value as 'light' | 'dark' | 'system' | 'custom');
   };
 
   const handleLanguageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLanguage(event.target.value);
+  };
+
+  const handleColorChange = (color: any) => {
+    setPrimaryColor(color.hex);
   };
 
   const renderSettingContent = () => {
@@ -108,8 +114,27 @@ const Settings: React.FC = () => {
                 <FormControlLabel value="dark" control={<Radio />} label={t('settings.darkMode')} />
                 <FormControlLabel value="light" control={<Radio />} label={t('settings.lightMode')} />
                 <FormControlLabel value="system" control={<Radio />} label={t('settings.systemMode')} />
+                <FormControlLabel value="custom" control={<Radio />} label="自定义" />
               </RadioGroup>
             </FormControl>
+            {mode === 'custom' && (
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>自定义主题颜色</Typography>
+                <Button 
+                  variant="outlined" 
+                  onClick={() => setShowColorPicker(!showColorPicker)}
+                  sx={{ mb: 2 }}
+                >
+                  {showColorPicker ? '隐藏' : '显示'}颜色选择器
+                </Button>
+                {showColorPicker && (
+                  <ChromePicker 
+                    color={primaryColor} 
+                    onChangeComplete={handleColorChange} 
+                  />
+                )}
+              </Box>
+            )}
           </Box>
         );
       case 'language':

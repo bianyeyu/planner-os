@@ -7,13 +7,14 @@ import { useProject } from '../context/ProjectContext';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import TaskItem from '../components/TaskItem';
+import NoteItem from '../components/NoteItem';
 import { Task } from '../types/task';
 
 const ProjectPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const theme = useTheme();
   const [newNote, setNewNote] = useState('');
-  const { projects, updateProject, addTask, updateTask, addDocument, addNote } = useProject();
+  const { projects, updateProject, addTask, addDocument, addNote } = useProject();
   const [showCompletedTasks, setShowCompletedTasks] = useState(false);
 
   const project = projects.find(p => p.id === projectId);
@@ -31,11 +32,11 @@ const ProjectPage: React.FC = () => {
 
   const handleAddTask = () => {
     addTask(project.id, {
-      id: Date.now().toString(),
       title: 'New Task',
       dueDate: new Date().toISOString().split('T')[0],
       completed: false,
       subtasks: [],
+      progress: 0,
     });
   };
 
@@ -66,6 +67,7 @@ const ProjectPage: React.FC = () => {
             completed: false,
             dueDate: new Date().toISOString().split('T')[0],
             subtasks: [],
+            progress: 0,
           };
           return { ...task, subtasks: [...(task.subtasks || []), newSubtask] };
         }
@@ -187,7 +189,7 @@ const ProjectPage: React.FC = () => {
           </Box>
           <Box sx={{ bgcolor: theme.palette.action.hover, borderRadius: 2, p: 2, maxHeight: 200, overflowY: 'auto' }}>
             {project.notes.map((note, index) => (
-              <Typography key={index} sx={{ mb: 1 }}>{note}</Typography>
+              <NoteItem key={index} note={note} />
             ))}
           </Box>
         </Box>
